@@ -5190,6 +5190,30 @@ class ClashFFI {
       _lookup<ffi.NativeFunction<ffi.Void Function()>>('forceGc');
   late final _forceGc = _forceGcPtr.asFunction<void Function()>();
 
+  void setCurrentProfileName(
+    ffi.Pointer<ffi.Char> s,
+  ) {
+    return _setCurrentProfileName(
+      s,
+    );
+  }
+
+  late final _setCurrentProfileNamePtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Char>)>>(
+          'setCurrentProfileName');
+  late final _setCurrentProfileName = _setCurrentProfileNamePtr
+      .asFunction<void Function(ffi.Pointer<ffi.Char>)>();
+
+  ffi.Pointer<ffi.Char> getCurrentProfileName() {
+    return _getCurrentProfileName();
+  }
+
+  late final _getCurrentProfileNamePtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
+          'getCurrentProfileName');
+  late final _getCurrentProfileName =
+      _getCurrentProfileNamePtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
+
   void validateConfig(
     ffi.Pointer<ffi.Char> s,
     int port,
@@ -5327,16 +5351,16 @@ class ClashFFI {
   late final _getConnections =
       _getConnectionsPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
 
-  int closeConnections() {
+  void closeConnections() {
     return _closeConnections();
   }
 
   late final _closeConnectionsPtr =
-      _lookup<ffi.NativeFunction<GoUint8 Function()>>('closeConnections');
+      _lookup<ffi.NativeFunction<ffi.Void Function()>>('closeConnections');
   late final _closeConnections =
-      _closeConnectionsPtr.asFunction<int Function()>();
+      _closeConnectionsPtr.asFunction<void Function()>();
 
-  int closeConnection(
+  void closeConnection(
     ffi.Pointer<ffi.Char> id,
   ) {
     return _closeConnection(
@@ -5345,10 +5369,10 @@ class ClashFFI {
   }
 
   late final _closeConnectionPtr =
-      _lookup<ffi.NativeFunction<GoUint8 Function(ffi.Pointer<ffi.Char>)>>(
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Char>)>>(
           'closeConnection');
   late final _closeConnection =
-      _closeConnectionPtr.asFunction<int Function(ffi.Pointer<ffi.Char>)>();
+      _closeConnectionPtr.asFunction<void Function(ffi.Pointer<ffi.Char>)>();
 
   ffi.Pointer<ffi.Char> getProviders() {
     return _getProviders();
@@ -5406,20 +5430,30 @@ class ClashFFI {
 
   void initNativeApiBridge(
     ffi.Pointer<ffi.Void> api,
-    int port,
   ) {
     return _initNativeApiBridge(
       api,
+    );
+  }
+
+  late final _initNativeApiBridgePtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Void>)>>(
+          'initNativeApiBridge');
+  late final _initNativeApiBridge = _initNativeApiBridgePtr
+      .asFunction<void Function(ffi.Pointer<ffi.Void>)>();
+
+  void initMessage(
+    int port,
+  ) {
+    return _initMessage(
       port,
     );
   }
 
-  late final _initNativeApiBridgePtr = _lookup<
-      ffi.NativeFunction<
-          ffi.Void Function(
-              ffi.Pointer<ffi.Void>, ffi.LongLong)>>('initNativeApiBridge');
-  late final _initNativeApiBridge = _initNativeApiBridgePtr
-      .asFunction<void Function(ffi.Pointer<ffi.Void>, int)>();
+  late final _initMessagePtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.LongLong)>>(
+          'initMessage');
+  late final _initMessage = _initMessagePtr.asFunction<void Function(int)>();
 
   void freeCString(
     ffi.Pointer<ffi.Char> s,
@@ -5465,17 +5499,54 @@ class ClashFFI {
   late final _setProcessMap =
       _setProcessMapPtr.asFunction<void Function(ffi.Pointer<ffi.Char>)>();
 
+  ffi.Pointer<ffi.Char> getAndroidProps() {
+    return _getAndroidProps();
+  }
+
+  late final _getAndroidPropsPtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
+          'getAndroidProps');
+  late final _getAndroidProps =
+      _getAndroidPropsPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
+
+  void setAndroidProps(
+    ffi.Pointer<ffi.Char> s,
+  ) {
+    return _setAndroidProps(
+      s,
+    );
+  }
+
+  late final _setAndroidPropsPtr =
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Char>)>>(
+          'setAndroidProps');
+  late final _setAndroidProps =
+      _setAndroidPropsPtr.asFunction<void Function(ffi.Pointer<ffi.Char>)>();
+
   void startTUN(
     int fd,
+    int port,
   ) {
     return _startTUN(
       fd,
+      port,
     );
   }
 
   late final _startTUNPtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int)>>('startTUN');
-  late final _startTUN = _startTUNPtr.asFunction<void Function(int)>();
+      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Int, ffi.LongLong)>>(
+          'startTUN');
+  late final _startTUN = _startTUNPtr.asFunction<void Function(int, int)>();
+
+  ffi.Pointer<ffi.Char> getRunTime() {
+    return _getRunTime();
+  }
+
+  late final _getRunTimePtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
+          'getRunTime');
+  late final _getRunTime =
+      _getRunTimePtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
 
   void stopTun() {
     return _stopTun();

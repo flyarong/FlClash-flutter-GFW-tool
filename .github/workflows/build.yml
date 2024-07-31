@@ -15,10 +15,16 @@ jobs:
             os: ubuntu-latest
           - platform: windows
             os: windows-latest
+            arch: amd64
           - platform: linux
             os: ubuntu-latest
+            arch: amd64
           - platform: macos
             os: macos-13
+            arch: amd64
+          - platform: macos
+            os: macos-latest
+            arch: arm64
 
     steps:
       - name: Setup Mingw64
@@ -89,13 +95,12 @@ jobs:
         run: flutter pub get
 
       - name: Setup
-        run: |
-          dart setup.dart ${{ matrix.platform }}
+        run: dart setup.dart ${{ matrix.platform }} ${{ matrix.arch && format('--arch {0}', matrix.arch) }}
 
       - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: artifact-${{ matrix.platform }}
+          name: artifact-${{ matrix.platform }}${{ matrix.arch && format('-{0}', matrix.arch) }}
           path: ./dist
           retention-days: 1
           overwrite: true
@@ -136,3 +141,17 @@ jobs:
         with:
           files: ./dist/*
           body_path: './release.md'
+
+      - name: Push to fdroid repo
+        uses: cpina/github-action-push-to-another-repository@v1.7.2
+        env:
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+        with:
+          source-directory: ./dist/
+          destination-github-username: chen08209
+          destination-repository-name: FlClash-fdroid-repo
+          user-name: 'github-actions[bot]'
+          user-email: 'github-actions[bot]@users.noreply.github.com'
+          target-branch: action-pr
+          commit-message: Update from ${{ github.ref_name }}
+          target-directory: /tmp/

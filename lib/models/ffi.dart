@@ -1,8 +1,6 @@
 // ignore_for_file: invalid_annotation_target
 
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/models/clash_config.dart';
-import 'package:fl_clash/models/connection.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -47,14 +45,25 @@ class ChangeProxyParams with _$ChangeProxyParams {
 }
 
 @freezed
-class Message with _$Message {
-  const factory Message({
-    required MessageType type,
+class AppMessage with _$AppMessage {
+  const factory AppMessage({
+    required AppMessageType type,
     dynamic data,
-  }) = _Message;
+  }) = _AppMessage;
 
-  factory Message.fromJson(Map<String, Object?> json) =>
-      _$MessageFromJson(json);
+  factory AppMessage.fromJson(Map<String, Object?> json) =>
+      _$AppMessageFromJson(json);
+}
+
+@freezed
+class ServiceMessage with _$ServiceMessage {
+  const factory ServiceMessage({
+    required ServiceMessageType type,
+    dynamic data,
+  }) = _ServiceMessage;
+
+  factory ServiceMessage.fromJson(Map<String, Object?> json) =>
+      _$ServiceMessageFromJson(json);
 }
 
 @freezed
@@ -121,3 +130,27 @@ class ExternalProvider with _$ExternalProvider {
   factory ExternalProvider.fromJson(Map<String, Object?> json) =>
       _$ExternalProviderFromJson(json);
 }
+
+abstract mixin class AppMessageListener {
+  void onLog(Log log) {}
+
+  void onDelay(Delay delay) {}
+
+  void onRequest(Connection connection) {}
+
+  void onStarted(String runTime) {}
+
+  void onLoaded(String groupName) {}
+}
+
+abstract mixin class ServiceMessageListener {
+  onProtect(Fd fd) {}
+
+  onProcess(Process process) {}
+
+  onStarted(String runTime) {}
+
+  onLoaded(String groupName) {}
+}
+
+

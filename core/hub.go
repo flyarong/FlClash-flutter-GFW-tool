@@ -13,6 +13,7 @@ import (
 	"github.com/metacubex/mihomo/adapter/provider"
 	"github.com/metacubex/mihomo/common/structure"
 	"github.com/metacubex/mihomo/common/utils"
+	"github.com/metacubex/mihomo/component/geodata"
 	"github.com/metacubex/mihomo/component/mmdb"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
@@ -34,6 +35,8 @@ var currentConfig = config.DefaultRawConfig()
 var configParams = ConfigExtendedParams{}
 
 var isInit = false
+
+var currentProfileName = ""
 
 //export initClash
 func initClash(homeDirStr *C.char) bool {
@@ -73,6 +76,16 @@ func forceGc() {
 	}()
 }
 
+//export setCurrentProfileName
+func setCurrentProfileName(s *C.char) {
+	currentProfileName = C.GoString(s)
+}
+
+//export getCurrentProfileName
+func getCurrentProfileName() *C.char {
+	return C.CString(currentProfileName)
+}
+
 //export validateConfig
 func validateConfig(s *C.char, port C.longlong) {
 	i := int64(port)
@@ -94,11 +107,11 @@ func updateConfig(s *C.char, port C.longlong) {
 	go func() {
 		var params = &GenerateConfigParams{}
 		err := json.Unmarshal([]byte(paramsString), params)
-		configParams = params.Params
 		if err != nil {
 			bridge.SendToPort(i, err.Error())
 			return
 		}
+		configParams = params.Params
 		prof := decorationConfig(params.ProfilePath, params.Config)
 		currentConfig = prof
 		applyConfig()
@@ -286,7 +299,7 @@ func getConnections() *C.char {
 }
 
 //export closeConnections
-func closeConnections() bool {
+func closeConnections() {
 	statistic.DefaultManager.Range(func(c statistic.Tracker) bool {
 		err := c.Close()
 		if err != nil {
@@ -294,17 +307,16 @@ func closeConnections() bool {
 		}
 		return true
 	})
-	return true
 }
 
 //export closeConnection
-func closeConnection(id *C.char) bool {
+func closeConnection(id *C.char) {
 	connectionId := C.GoString(id)
-	err := statistic.DefaultManager.Get(connectionId).Close()
-	if err != nil {
-		return false
+	c := statistic.DefaultManager.Get(connectionId)
+	if c == nil {
+		return
 	}
-	return true
+	_ = c.Close()
 }
 
 //export getProviders
@@ -384,14 +396,8 @@ func updateExternalProvider(providerName *C.char, providerType *C.char, port C.l
 				bridge.SendToPort(i, err.Error())
 				return
 			}
-		case "GeoIp":
+		case "MMDB":
 			err := mmdb.DownloadMMDB(constant.Path.Resolve(providerNameString))
-			if err != nil {
-				bridge.SendToPort(i, err.Error())
-				return
-			}
-		case "GeoSite":
-			err := mmdb.DownloadGeoSite(constant.Path.Resolve(providerNameString))
 			if err != nil {
 				bridge.SendToPort(i, err.Error())
 				return
@@ -402,16 +408,32 @@ func updateExternalProvider(providerName *C.char, providerType *C.char, port C.l
 				bridge.SendToPort(i, err.Error())
 				return
 			}
+		case "GeoIp":
+			err := geodata.DownloadGeoIP(constant.Path.Resolve(providerNameString))
+			if err != nil {
+				bridge.SendToPort(i, err.Error())
+				return
+			}
+		case "GeoSite":
+			err := geodata.DownloadGeoSite(constant.Path.Resolve(providerNameString))
+			if err != nil {
+				bridge.SendToPort(i, err.Error())
+				return
+			}
 		}
 		bridge.SendToPort(i, "")
 	}()
 }
 
 //export initNativeApiBridge
-func initNativeApiBridge(api unsafe.Pointer, port C.longlong) {
+func initNativeApiBridge(api unsafe.Pointer) {
 	bridge.InitDartApi(api)
+}
+
+//export initMessage
+func initMessage(port C.longlong) {
 	i := int64(port)
-	bridge.Port = &i
+	Port = i
 }
 
 //export freeCString
@@ -429,20 +451,20 @@ func init() {
 		} else {
 			delayData.Value = int32(delay)
 		}
-		bridge.SendMessage(bridge.Message{
-			Type: bridge.Delay,
+		SendMessage(Message{
+			Type: DelayMessage,
 			Data: delayData,
 		})
 	}
 	statistic.DefaultRequestNotify = func(c statistic.Tracker) {
-		bridge.SendMessage(bridge.Message{
-			Type: bridge.Request,
+		SendMessage(Message{
+			Type: RequestMessage,
 			Data: c,
 		})
 	}
 	executor.DefaultProxyProviderLoadedHook = func(providerName string) {
-		bridge.SendMessage(bridge.Message{
-			Type: bridge.Loaded,
+		SendMessage(Message{
+			Type: LoadedMessage,
 			Data: providerName,
 		})
 	}

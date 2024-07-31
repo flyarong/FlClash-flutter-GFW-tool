@@ -19,14 +19,14 @@ class Request {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) {
-          _syncProxy();
+          _updateAdapter();
           return handler.next(options); // 继续请求
         },
       ),
     );
   }
 
-  _syncProxy() {
+  _updateAdapter() {
     final port = globalState.appController.clashConfig.mixedPort;
     final isStart = globalState.appController.appState.isStart;
     if (_port != port || isStart != _isStart) {
@@ -36,11 +36,13 @@ class Request {
         createHttpClient: () {
           final client = HttpClient();
           if (!_isStart) return client;
+          client.userAgent = globalState.appController.clashConfig.globalUa;
           client.findProxy = (url) {
             return "PROXY localhost:$_port;DIRECT";
           };
           return client;
         },
+        validateCertificate: (_, __, ___) => true,
       );
     }
   }

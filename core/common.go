@@ -21,6 +21,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -83,23 +84,8 @@ type TestDelayParams struct {
 	Timeout   int64  `json:"timeout"`
 }
 
-type Delay struct {
-	Name  string `json:"name"`
-	Value int32  `json:"value"`
-}
-
-type Process struct {
-	Id       int64              `json:"id"`
-	Metadata *constant.Metadata `json:"metadata"`
-}
-
 type ProcessMapItem struct {
 	Id    int64  `json:"id"`
-	Value string `json:"value"`
-}
-
-type Now struct {
-	Name  string `json:"name"`
 	Value string `json:"value"`
 }
 
@@ -336,7 +322,7 @@ func overwriteConfig(targetConfig *config.RawConfig, patchConfig config.RawConfi
 	targetConfig.ExternalUIURL = ""
 	targetConfig.TCPConcurrent = patchConfig.TCPConcurrent
 	targetConfig.UnifiedDelay = patchConfig.UnifiedDelay
-	targetConfig.GeodataMode = false
+	//targetConfig.GeodataMode = false
 	targetConfig.IPv6 = patchConfig.IPv6
 	targetConfig.LogLevel = patchConfig.LogLevel
 	targetConfig.Port = 0
@@ -351,6 +337,8 @@ func overwriteConfig(targetConfig *config.RawConfig, patchConfig config.RawConfi
 	targetConfig.Tun.Stack = patchConfig.Tun.Stack
 	targetConfig.GeodataLoader = patchConfig.GeodataLoader
 	targetConfig.Profile.StoreSelected = false
+	targetConfig.GeoXUrl = patchConfig.GeoXUrl
+	targetConfig.GlobalUA = patchConfig.GlobalUA
 	if targetConfig.DNS.Enable == false {
 		targetConfig.DNS = patchConfig.DNS
 	}
@@ -420,7 +408,11 @@ func patchSelectGroup() {
 	}
 }
 
+var applyLock sync.Mutex
+
 func applyConfig() {
+	applyLock.Lock()
+	defer applyLock.Unlock()
 	cfg, err := config.ParseRawConfig(currentConfig)
 	if err != nil {
 		cfg, _ = config.ParseRawConfig(config.DefaultRawConfig())
@@ -431,6 +423,7 @@ func applyConfig() {
 	if configParams.IsPatch {
 		patchConfig(cfg.General)
 	} else {
+		closeConnections()
 		runtime.GC()
 		hub.UltraApplyConfig(cfg, true)
 		patchSelectGroup()

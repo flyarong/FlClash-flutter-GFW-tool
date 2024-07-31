@@ -35,7 +35,6 @@ class ClashCore {
     clashFFI = ClashFFI(lib);
     clashFFI.initNativeApiBridge(
       NativeApi.initializeApiDLData,
-      receiver.sendPort.nativePort,
     );
   }
 
@@ -93,6 +92,28 @@ class ClashCore {
     );
     malloc.free(paramsChar);
     return completer.future;
+  }
+
+  initMessage() {
+    clashFFI.initMessage(
+      receiver.sendPort.nativePort,
+    );
+  }
+
+  setProfileName(String profileName) {
+    final profileNameChar = profileName.toNativeUtf8().cast<Char>();
+    clashFFI.setCurrentProfileName(
+      profileNameChar,
+    );
+    malloc.free(profileNameChar);
+  }
+
+  getProfileName() {
+    final currentProfileNameRaw = clashFFI.getCurrentProfileName();
+    final currentProfileName =
+        currentProfileNameRaw.cast<Utf8>().toDartString();
+    clashFFI.freeCString(currentProfileNameRaw);
+    return currentProfileName;
   }
 
   Future<List<Group>> getProxiesGroups() {
@@ -216,6 +237,21 @@ class ClashCore {
     return VersionInfo.fromJson(versionInfo);
   }
 
+  setProps(Props props) {
+    final propsChar = json.encode(props).toNativeUtf8().cast<Char>();
+    clashFFI.setAndroidProps(propsChar);
+    malloc.free(propsChar);
+  }
+
+  Props getProps() {
+    final androidPropsRaw = clashFFI.getAndroidProps();
+    final androidProps = json.decode(
+      androidPropsRaw.cast<Utf8>().toDartString(),
+    );
+    clashFFI.freeCString(androidPropsRaw);
+    return Props.fromJson(androidProps);
+  }
+
   Traffic getTraffic() {
     final trafficRaw = clashFFI.getTraffic();
     final trafficMap = json.decode(trafficRaw.cast<Utf8>().toDartString());
@@ -242,8 +278,9 @@ class ClashCore {
     clashFFI.stopLog();
   }
 
-  startTun(int fd) {
-    clashFFI.startTUN(fd);
+  startTun(int fd, int port) {
+    if (!Platform.isAndroid) return;
+    clashFFI.startTUN(fd, port);
   }
 
   requestGc() {
@@ -265,11 +302,13 @@ class ClashCore {
     clashFFI.setFdMap(fd);
   }
 
-  // DateTime? getRunTime() {
-  //   final runTimeString = clashFFI.getRunTime().cast<Utf8>().toDartString();
-  //   if (runTimeString.isEmpty) return null;
-  //   return DateTime.fromMillisecondsSinceEpoch(int.parse(runTimeString));
-  // }
+  DateTime? getRunTime() {
+    final runTimeRaw = clashFFI.getRunTime();
+    final runTimeString = runTimeRaw.cast<Utf8>().toDartString();
+    clashFFI.freeCString(runTimeRaw);
+    if (runTimeString.isEmpty) return null;
+    return DateTime.fromMillisecondsSinceEpoch(int.parse(runTimeString));
+  }
 
   List<Connection> getConnections() {
     final connectionsDataRaw = clashFFI.getConnections();
@@ -280,10 +319,14 @@ class ClashCore {
     return connectionsRaw.map((e) => Connection.fromJson(e)).toList();
   }
 
-  closeConnections(String id) {
+  closeConnection(String id) {
     final idChar = id.toNativeUtf8().cast<Char>();
     clashFFI.closeConnection(idChar);
     malloc.free(idChar);
+  }
+
+  closeConnections() {
+    clashFFI.closeConnections();
   }
 }
 

@@ -3,7 +3,6 @@ import 'package:fl_clash/fragments/profiles/edit_profile.dart';
 import 'package:fl_clash/fragments/profiles/view_profile.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/common/common.dart';
-import 'package:fl_clash/plugins/app.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
 import 'package:flutter/material.dart';
@@ -73,17 +72,7 @@ class _ProfilesFragmentState extends State<ProfilesFragment> {
             },
             icon: const Icon(Icons.sync),
           ),
-          const SizedBox(
-            width: 8,
-          )
         ];
-        commonScaffoldState?.floatingActionButton = FloatingActionButton(
-          heroTag: null,
-          onPressed: _handleShowAddExtendPage,
-          child: const Icon(
-            Icons.add,
-          ),
-        );
       },
     );
   }
@@ -114,77 +103,82 @@ class _ProfilesFragmentState extends State<ProfilesFragment> {
 
   @override
   Widget build(BuildContext context) {
-    return Selector<AppState, bool>(
-      selector: (_, appState) => appState.currentLabel == 'profiles',
-      builder: (_, isCurrent, child) {
-        if (isCurrent) {
-          _initScaffoldState();
-        }
-        return child!;
-      },
-      child: Selector2<AppState, Config, ProfilesSelectorState>(
-        selector: (_, appState, config) => ProfilesSelectorState(
-          profiles: config.profiles,
-          currentProfileId: config.currentProfileId,
-          viewMode: appState.viewMode,
+    return FloatLayout(
+      floatingWidget: FloatWrapper(
+        child: FloatingActionButton(
+          heroTag: null,
+          onPressed: _handleShowAddExtendPage,
+          child: const Icon(
+            Icons.add,
+          ),
         ),
-        builder: (context, state, child) {
-          if (state.profiles.isEmpty) {
-            return NullStatus(
-              label: appLocalizations.nullProfileDesc,
-            );
+      ),
+      child: Selector<AppState, bool>(
+        selector: (_, appState) => appState.currentLabel == 'profiles',
+        builder: (_, isCurrent, child) {
+          if (isCurrent) {
+            _initScaffoldState();
           }
-          profileItemKeys = state.profiles
-              .map((profile) => GlobalObjectKey<_ProfileItemState>(profile.id))
-              .toList();
-          final columns = _getColumns(state.viewMode);
-          final isMobile = state.viewMode == ViewMode.mobile;
-          return Align(
-            alignment: Alignment.topCenter,
-            child: NotificationListener<ScrollNotification>(
-              onNotification: (scrollNotification) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
+          return child!;
+        },
+        child: Selector2<AppState, Config, ProfilesSelectorState>(
+          selector: (_, appState, config) => ProfilesSelectorState(
+            profiles: config.profiles,
+            currentProfileId: config.currentProfileId,
+            viewMode: appState.viewMode,
+          ),
+          builder: (context, state, child) {
+            if (state.profiles.isEmpty) {
+              return NullStatus(
+                label: appLocalizations.nullProfileDesc,
+              );
+            }
+            profileItemKeys = state.profiles
+                .map(
+                    (profile) => GlobalObjectKey<_ProfileItemState>(profile.id))
+                .toList();
+            final columns = _getColumns(state.viewMode);
+            return Align(
+              alignment: Alignment.topCenter,
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (scrollNotification) {
                   hasPadding.value =
                       scrollNotification.metrics.maxScrollExtent > 0;
-                });
-                return true;
-              },
-              child: ValueListenableBuilder(
-                valueListenable: hasPadding,
-                builder: (_, hasPadding, __) {
-                  return SingleChildScrollView(
-                    padding: !isMobile
-                        ? EdgeInsets.only(
-                            left: 16,
-                            right: 16,
-                            top: 16,
-                            bottom: 16 + (hasPadding ? 56 : 0),
-                          )
-                        : EdgeInsets.only(
-                            bottom: 0 + (hasPadding ? 56 : 0),
-                          ),
-                    child: Grid(
-                      mainAxisSpacing: isMobile ? 8 : 16,
-                      crossAxisSpacing: 16,
-                      crossAxisCount: columns,
-                      children: [
-                        for (int i = 0; i < state.profiles.length; i++)
-                          GridItem(
-                            child: ProfileItem(
-                              key: profileItemKeys[i],
-                              profile: state.profiles[i],
-                              groupValue: state.currentProfileId,
-                              onChanged: _changeProfile,
-                            ),
-                          ),
-                      ],
-                    ),
-                  );
+                  return true;
                 },
+                child: ValueListenableBuilder(
+                  valueListenable: hasPadding,
+                  builder: (_, hasPadding, __) {
+                    return SingleChildScrollView(
+                      padding: EdgeInsets.only(
+                        left: 16,
+                        right: 16,
+                        top: 16,
+                        bottom: 16 + (hasPadding ? 72 : 0),
+                      ),
+                      child: Grid(
+                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 16,
+                        crossAxisCount: columns,
+                        children: [
+                          for (int i = 0; i < state.profiles.length; i++)
+                            GridItem(
+                              child: ProfileItem(
+                                key: profileItemKeys[i],
+                                profile: state.profiles[i],
+                                groupValue: state.currentProfileId,
+                                onChanged: _changeProfile,
+                              ),
+                            ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }
@@ -220,11 +214,18 @@ class _ProfileItemState extends State<ProfileItem> {
   Future updateProfile([isSingle = true]) async {
     isUpdating.value = true;
     try {
-      await globalState.appController.updateProfile(widget.profile);
+      final appController = globalState.appController;
+      await appController.updateProfile(widget.profile);
+      if (widget.profile.id == appController.config.currentProfile?.id &&
+          !appController.appState.isStart) {
+        globalState.appController.rawApplyProfile();
+      }
     } catch (e) {
       isUpdating.value = false;
       if (!isSingle) {
         return e.toString();
+      } else {
+        rethrow;
       }
     }
     isUpdating.value = false;
@@ -264,11 +265,13 @@ class _ProfileItemState extends State<ProfileItem> {
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                profile.label ?? profile.id,
-                style: textTheme.titleMedium,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              Flexible(
+                child: Text(
+                  profile.label ?? profile.id,
+                  style: textTheme.titleMedium,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               Text(
                 profile.lastUpdateDate?.lastUpdateTimeDesc ?? '',
@@ -310,13 +313,6 @@ class _ProfileItemState extends State<ProfileItem> {
                 ),
                 Row(
                   children: [
-                    Text(
-                      appLocalizations.expirationTime,
-                      style: textTheme.labelMedium?.toLighter,
-                    ),
-                    const SizedBox(
-                      width: 4,
-                    ),
                     Text(
                       expireShow,
                       style: textTheme.labelMedium?.toLighter,
@@ -412,16 +408,7 @@ class _ProfileItemState extends State<ProfileItem> {
     final profile = widget.profile;
     final groupValue = widget.groupValue;
     final onChanged = widget.onChanged;
-    return Selector<AppState, ViewMode>(
-      selector: (_, appState) => appState.viewMode,
-      builder: (_, viewMode, child) {
-        if (viewMode == ViewMode.mobile) {
-          return child!;
-        }
-        return CommonCard(
-          child: child!,
-        );
-      },
+    return CommonCard(
       child: ListItem.radio(
         key: Key(profile.id),
         horizontalTitleGap: 16,

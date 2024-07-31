@@ -17,6 +17,7 @@ class AppController {
   late ClashConfig clashConfig;
   late Measure measure;
   late Function updateClashConfigDebounce;
+  late Function addCheckIpNumDebounce;
 
   AppController(this.context) {
     appState = context.read<AppState>();
@@ -24,6 +25,9 @@ class AppController {
     clashConfig = context.read<ClashConfig>();
     updateClashConfigDebounce = debounce<Function()>(() async {
       await updateClashConfig();
+    });
+    addCheckIpNumDebounce = debounce(() {
+      appState.checkIpNum++;
     });
     measure = Measure.of(context);
   }
@@ -66,7 +70,6 @@ class AppController {
 
   updateTraffic() {
     globalState.updateTraffic(
-      config: config,
       appState: appState,
     );
   }
@@ -87,7 +90,7 @@ class AppController {
         final updateId = config.profiles.first.id;
         changeProfile(updateId);
       } else {
-        changeProfile(null);
+        updateSystemProxy(false);
       }
     }
   }
@@ -115,6 +118,14 @@ class AppController {
         clashConfig: clashConfig,
       );
     });
+  }
+
+  Future rawApplyProfile() async {
+    await globalState.applyProfile(
+      appState: appState,
+      config: config,
+      clashConfig: clashConfig,
+    );
   }
 
   changeProfile(String? value) async {
@@ -182,6 +193,7 @@ class AppController {
   }
 
   handleBackOrExit() async {
+    print(config.isMinimizeOnExit);
     if (config.isMinimizeOnExit) {
       if (system.isDesktop) {
         await savePreferences();
@@ -399,15 +411,7 @@ class AppController {
     addProfileFormURL(url);
   }
 
-  int get columns =>
-      globalState.getColumns(appState.viewMode, config.proxiesColumns);
-
-  changeColumns() {
-    config.proxiesColumns = globalState.getColumns(
-      appState.viewMode,
-      columns - 1,
-    );
-  }
+  int get columns => other.getColumns(appState.viewMode, config.proxiesColumns);
 
   updateViewWidth(double width) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -448,5 +452,10 @@ class AppController {
       ProxiesSortType.delay => _sortOfDelay(proxies),
       ProxiesSortType.name => _sortOfName(proxies),
     };
+  }
+
+  String getCurrentSelectedName(String groupName) {
+    final group = appState.getGroupWithName(groupName);
+    return config.currentSelectedMap[groupName] ?? group?.now ?? '';
   }
 }

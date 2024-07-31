@@ -58,6 +58,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Auto check updates"),
         "autoCheckUpdateDesc": MessageLookupByLibrary.simpleMessage(
             "Auto check for updates when the app starts"),
+        "autoCloseConnections":
+            MessageLookupByLibrary.simpleMessage("Auto lose connections"),
+        "autoCloseConnectionsDesc": MessageLookupByLibrary.simpleMessage(
+            "Auto close connections after change node"),
         "autoLaunch": MessageLookupByLibrary.simpleMessage("AutoLaunch"),
         "autoLaunchDesc": MessageLookupByLibrary.simpleMessage(
             "Follow the system self startup"),
@@ -87,14 +91,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "checkUpdateError": MessageLookupByLibrary.simpleMessage(
             "The current application is already the latest version"),
         "checking": MessageLookupByLibrary.simpleMessage("Checking..."),
+        "columns": MessageLookupByLibrary.simpleMessage("Columns"),
         "compatible":
             MessageLookupByLibrary.simpleMessage("Compatibility mode"),
         "compatibleDesc": MessageLookupByLibrary.simpleMessage(
             "Opening it will lose part of its application ability and gain the support of full amount of Clash."),
         "confirm": MessageLookupByLibrary.simpleMessage("Confirm"),
         "connections": MessageLookupByLibrary.simpleMessage("Connections"),
-        "connectionsDesc":
-            MessageLookupByLibrary.simpleMessage("View current connection"),
+        "connectionsDesc": MessageLookupByLibrary.simpleMessage(
+            "View current connections data"),
         "connectivity": MessageLookupByLibrary.simpleMessage("Connectivity："),
         "copy": MessageLookupByLibrary.simpleMessage("Copy"),
         "core": MessageLookupByLibrary.simpleMessage("Core"),
@@ -107,6 +112,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "days": MessageLookupByLibrary.simpleMessage("Days"),
         "defaultSort": MessageLookupByLibrary.simpleMessage("Sort by default"),
         "defaultText": MessageLookupByLibrary.simpleMessage("Default"),
+        "delay": MessageLookupByLibrary.simpleMessage("Delay"),
         "delaySort": MessageLookupByLibrary.simpleMessage("Sort by delay"),
         "delete": MessageLookupByLibrary.simpleMessage("Delete"),
         "desc": MessageLookupByLibrary.simpleMessage(
@@ -121,13 +127,19 @@ class MessageLookup extends MessageLookupByLibrary {
         "download": MessageLookupByLibrary.simpleMessage("Download"),
         "edit": MessageLookupByLibrary.simpleMessage("Edit"),
         "en": MessageLookupByLibrary.simpleMessage("English"),
+        "exclude":
+            MessageLookupByLibrary.simpleMessage("Hidden from recent tasks"),
+        "excludeDesc": MessageLookupByLibrary.simpleMessage(
+            "When the app is in the background, the app is hidden from the recent task"),
         "exit": MessageLookupByLibrary.simpleMessage("Exit"),
+        "expand": MessageLookupByLibrary.simpleMessage("Standard"),
         "expirationTime":
             MessageLookupByLibrary.simpleMessage("Expiration time"),
         "externalController":
             MessageLookupByLibrary.simpleMessage("ExternalController"),
         "externalControllerDesc": MessageLookupByLibrary.simpleMessage(
             "Once enabled, the Clash kernel can be controlled on port 9090"),
+        "externalLink": MessageLookupByLibrary.simpleMessage("External link"),
         "externalResources":
             MessageLookupByLibrary.simpleMessage("External resources"),
         "file": MessageLookupByLibrary.simpleMessage("File"),
@@ -138,6 +150,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "findProcessMode": MessageLookupByLibrary.simpleMessage("Find process"),
         "findProcessModeDesc": MessageLookupByLibrary.simpleMessage(
             "There is a risk of flashback after opening"),
+        "fourColumns": MessageLookupByLibrary.simpleMessage("Four columns"),
         "general": MessageLookupByLibrary.simpleMessage("General"),
         "geoData": MessageLookupByLibrary.simpleMessage("GeoData"),
         "geodataLoader":
@@ -145,6 +158,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "geodataLoaderDesc": MessageLookupByLibrary.simpleMessage(
             "Enabling will use the Geo low memory loader"),
         "global": MessageLookupByLibrary.simpleMessage("Global"),
+        "go": MessageLookupByLibrary.simpleMessage("Go"),
         "goDownload": MessageLookupByLibrary.simpleMessage("Go to download"),
         "hours": MessageLookupByLibrary.simpleMessage("Hours"),
         "importFromURL":
@@ -158,12 +172,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "just": MessageLookupByLibrary.simpleMessage("Just"),
         "language": MessageLookupByLibrary.simpleMessage("Language"),
         "light": MessageLookupByLibrary.simpleMessage("Light"),
+        "list": MessageLookupByLibrary.simpleMessage("List"),
         "logLevel": MessageLookupByLibrary.simpleMessage("LogLevel"),
         "logcat": MessageLookupByLibrary.simpleMessage("Logcat"),
         "logcatDesc": MessageLookupByLibrary.simpleMessage(
             "Disabling will hide the log entry"),
         "logs": MessageLookupByLibrary.simpleMessage("Logs"),
         "logsDesc": MessageLookupByLibrary.simpleMessage("Log capture records"),
+        "min": MessageLookupByLibrary.simpleMessage("Min"),
         "minimizeOnExit":
             MessageLookupByLibrary.simpleMessage("Minimize on exit"),
         "minimizeOnExitDesc": MessageLookupByLibrary.simpleMessage(
@@ -191,7 +207,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "nullProfileDesc": MessageLookupByLibrary.simpleMessage(
             "No profile, Please add a profile"),
         "nullRequestsDesc": MessageLookupByLibrary.simpleMessage("No requests"),
+        "oneColumn": MessageLookupByLibrary.simpleMessage("One column"),
         "other": MessageLookupByLibrary.simpleMessage("Other"),
+        "otherContributors":
+            MessageLookupByLibrary.simpleMessage("Other contributors"),
         "outboundMode": MessageLookupByLibrary.simpleMessage("Outbound mode"),
         "override": MessageLookupByLibrary.simpleMessage("Override"),
         "overrideDesc": MessageLookupByLibrary.simpleMessage(
@@ -226,6 +245,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "profiles": MessageLookupByLibrary.simpleMessage("Profiles"),
         "project": MessageLookupByLibrary.simpleMessage("Project"),
         "proxies": MessageLookupByLibrary.simpleMessage("Proxies"),
+        "proxiesSetting":
+            MessageLookupByLibrary.simpleMessage("Proxies setting"),
+        "proxyGroup": MessageLookupByLibrary.simpleMessage("Proxy group"),
         "proxyPort": MessageLookupByLibrary.simpleMessage("ProxyPort"),
         "proxyPortDesc": MessageLookupByLibrary.simpleMessage(
             "Set the Clash listening port"),
@@ -243,7 +265,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Recovery success"),
         "requests": MessageLookupByLibrary.simpleMessage("Requests"),
         "requestsDesc": MessageLookupByLibrary.simpleMessage(
-            "View recently requested data"),
+            "View recently request records"),
         "resources": MessageLookupByLibrary.simpleMessage("Resources"),
         "resourcesDesc": MessageLookupByLibrary.simpleMessage(
             "External resource related info"),
@@ -254,15 +276,21 @@ class MessageLookup extends MessageLookupByLibrary {
         "selected": MessageLookupByLibrary.simpleMessage("Selected"),
         "settings": MessageLookupByLibrary.simpleMessage("Settings"),
         "show": MessageLookupByLibrary.simpleMessage("Show"),
+        "shrink": MessageLookupByLibrary.simpleMessage("Shrink"),
         "silentLaunch": MessageLookupByLibrary.simpleMessage("SilentLaunch"),
         "silentLaunchDesc":
             MessageLookupByLibrary.simpleMessage("Start in the background"),
+        "size": MessageLookupByLibrary.simpleMessage("Size"),
+        "sort": MessageLookupByLibrary.simpleMessage("Sort"),
         "startVpn": MessageLookupByLibrary.simpleMessage("Staring VPN..."),
         "stopVpn": MessageLookupByLibrary.simpleMessage("Stopping VPN..."),
+        "style": MessageLookupByLibrary.simpleMessage("Style"),
         "submit": MessageLookupByLibrary.simpleMessage("Submit"),
+        "sync": MessageLookupByLibrary.simpleMessage("Sync"),
         "systemProxy": MessageLookupByLibrary.simpleMessage("SystemProxy"),
         "systemProxyDesc": MessageLookupByLibrary.simpleMessage(
             "Attach HTTP proxy to VpnService"),
+        "tab": MessageLookupByLibrary.simpleMessage("Tab"),
         "tabAnimation": MessageLookupByLibrary.simpleMessage("Tab animation"),
         "tabAnimationDesc": MessageLookupByLibrary.simpleMessage(
             "When enabled, the home tab will add a toggle animation"),
@@ -275,12 +303,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "themeDesc": MessageLookupByLibrary.simpleMessage(
             "Set dark mode,adjust the color"),
         "themeMode": MessageLookupByLibrary.simpleMessage("Theme mode"),
+        "threeColumns": MessageLookupByLibrary.simpleMessage("Three columns"),
         "tip": MessageLookupByLibrary.simpleMessage("tip"),
         "tools": MessageLookupByLibrary.simpleMessage("Tools"),
         "trafficUsage": MessageLookupByLibrary.simpleMessage("Traffic usage"),
         "tun": MessageLookupByLibrary.simpleMessage("TUN mode"),
         "tunDesc": MessageLookupByLibrary.simpleMessage(
             "only effective in administrator mode"),
+        "twoColumns": MessageLookupByLibrary.simpleMessage("Two columns"),
         "unableToUpdateCurrentProfileDesc":
             MessageLookupByLibrary.simpleMessage(
                 "unable to update current profile"),

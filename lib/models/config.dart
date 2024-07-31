@@ -29,12 +29,27 @@ class AccessControl with _$AccessControl {
 class Props with _$Props {
   const factory Props({
     AccessControl? accessControl,
-    bool? allowBypass,
-    bool? systemProxy,
+    required bool allowBypass,
+    required bool systemProxy,
   }) = _Props;
 
   factory Props.fromJson(Map<String, Object?> json) => _$PropsFromJson(json);
 }
+
+@freezed
+class WindowProps with _$WindowProps {
+  const factory WindowProps({
+    @Default(1000) double width,
+    @Default(600) double height,
+    double? top,
+    double? left,
+  }) = _WindowProps;
+
+  factory WindowProps.fromJson(Map<String, Object?>? json) =>
+      json == null ? defaultWindowProps : _$WindowPropsFromJson(json);
+}
+
+const defaultWindowProps = WindowProps();
 
 @JsonSerializable()
 class Config extends ChangeNotifier {
@@ -56,17 +71,21 @@ class Config extends ChangeNotifier {
   bool _autoCheckUpdate;
   bool _allowBypass;
   bool _systemProxy;
+  bool _isExclude;
   DAV? _dav;
+  bool _isCloseConnections;
   ProxiesType _proxiesType;
   ProxyCardType _proxyCardType;
   int _proxiesColumns;
   String _testUrl;
+  WindowProps _windowProps;
 
   Config()
       : _profiles = [],
         _autoLaunch = false,
         _silentLaunch = false,
         _autoRun = false,
+        _isCloseConnections = false,
         _themeMode = ThemeMode.system,
         _openLog = false,
         _isCompatible = true,
@@ -75,12 +94,14 @@ class Config extends ChangeNotifier {
         _isMinimizeOnExit = true,
         _isAccessControl = false,
         _autoCheckUpdate = true,
-        _systemProxy = true,
+        _systemProxy = false,
         _testUrl = defaultTestUrl,
         _accessControl = const AccessControl(),
         _isAnimateToPage = true,
         _allowBypass = true,
+        _isExclude = false,
         _proxyCardType = ProxyCardType.expand,
+        _windowProps = defaultWindowProps,
         _proxiesType = ProxiesType.tab,
         _proxiesColumns = 2;
 
@@ -374,7 +395,7 @@ class Config extends ChangeNotifier {
     }
   }
 
-  @JsonKey(defaultValue: true)
+  @JsonKey(defaultValue: false)
   bool get systemProxy {
     return _systemProxy;
   }
@@ -386,7 +407,22 @@ class Config extends ChangeNotifier {
     }
   }
 
-  @JsonKey(defaultValue: ProxiesType.tab)
+  @JsonKey(defaultValue: false)
+  bool get isCloseConnections {
+    return _isCloseConnections;
+  }
+
+  set isCloseConnections(bool value) {
+    if (_isCloseConnections != value) {
+      _isCloseConnections = value;
+      notifyListeners();
+    }
+  }
+
+  @JsonKey(
+    defaultValue: ProxiesType.tab,
+    unknownEnumValue: ProxiesType.tab,
+  )
   ProxiesType get proxiesType => _proxiesType;
 
   set proxiesType(ProxiesType value) {
@@ -416,13 +452,31 @@ class Config extends ChangeNotifier {
     }
   }
 
-
   @JsonKey(name: "test-url", defaultValue: defaultTestUrl)
   String get testUrl => _testUrl;
 
   set testUrl(String value) {
     if (_testUrl != value) {
       _testUrl = value;
+      notifyListeners();
+    }
+  }
+
+  @JsonKey(defaultValue: false)
+  bool get isExclude => _isExclude;
+
+  set isExclude(bool value) {
+    if (_isExclude != value) {
+      _isExclude = value;
+      notifyListeners();
+    }
+  }
+
+  WindowProps get windowProps => _windowProps;
+
+  set windowProps(WindowProps value) {
+    if (_windowProps != value) {
+      _windowProps = value;
       notifyListeners();
     }
   }
@@ -442,6 +496,7 @@ class Config extends ChangeNotifier {
       }
       if (onlyProfiles) return;
       _currentProfileId = config._currentProfileId;
+      _isCloseConnections = config._isCloseConnections;
       _isCompatible = config._isCompatible;
       _autoLaunch = config._autoLaunch;
       _silentLaunch = config._silentLaunch;
@@ -458,8 +513,9 @@ class Config extends ChangeNotifier {
       _accessControl = config._accessControl;
       _isAnimateToPage = config._isAnimateToPage;
       _autoCheckUpdate = config._autoCheckUpdate;
-      _dav = config._dav;
-      _testUrl = config.testUrl;
+      _testUrl = config._testUrl;
+      _isExclude = config._isExclude;
+      _windowProps = config._windowProps;
     }
     notifyListeners();
   }
@@ -470,10 +526,5 @@ class Config extends ChangeNotifier {
 
   factory Config.fromJson(Map<String, dynamic> json) {
     return _$ConfigFromJson(json);
-  }
-
-  @override
-  String toString() {
-    return 'Config{_profiles: $_profiles, _isCompatible: $_isCompatible, _currentProfileId: $_currentProfileId, _autoLaunch: $_autoLaunch, _silentLaunch: $_silentLaunch, _autoRun: $_autoRun, _openLog: $_openLog, _themeMode: $_themeMode, _locale: $_locale, _primaryColor: $_primaryColor, _proxiesSortType: $_proxiesSortType, _isMinimizeOnExit: $_isMinimizeOnExit, _isAccessControl: $_isAccessControl, _accessControl: $_accessControl, _isAnimateToPage: $_isAnimateToPage, _dav: $_dav}';
   }
 }

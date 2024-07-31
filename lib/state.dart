@@ -1,21 +1,23 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:animations/animations.dart';
 import 'package:fl_clash/clash/clash.dart';
-import 'package:fl_clash/enum/enum.dart';
+import 'package:fl_clash/plugins/proxy.dart';
 import 'package:fl_clash/widgets/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'controller.dart';
+
 import 'models/models.dart';
 import 'common/common.dart';
 
 class GlobalState {
   Timer? timer;
   Timer? groupsUpdateTimer;
+  var isVpnService = false;
   late PackageInfo packageInfo;
   Function? updateCurrentDelayDebounce;
   PageController? pageController;
@@ -51,7 +53,7 @@ class GlobalState {
         config: clashConfig,
         params: ConfigExtendedParams(
           isPatch: isPatch,
-          isCompatible: config.isCompatible,
+          isCompatible: true,
           selectedMap: config.currentSelectedMap,
           testUrl: config.testUrl,
         ),
@@ -69,25 +71,30 @@ class GlobalState {
     required Config config,
     required ClashConfig clashConfig,
   }) async {
-    final args = config.isAccessControl
-        ? json.encode(
-            Props(
-              accessControl: config.accessControl,
-              allowBypass: config.allowBypass,
-            ),
-          )
-        : null;
-    await proxyManager.startProxy(
-      port: clashConfig.mixedPort,
-      args: args,
-    );
+    if (!globalState.isVpnService && Platform.isAndroid) {
+      clashCore.setProps(
+        Props(
+          accessControl: config.isAccessControl ? config.accessControl : null,
+          allowBypass: config.allowBypass,
+          systemProxy: config.systemProxy,
+        ),
+      );
+      await proxy?.initService();
+    } else {
+      await proxyManager.startProxy(
+        port: clashConfig.mixedPort,
+      );
+    }
     startListenUpdate();
+    if (Platform.isAndroid) {
+      return;
+    }
     applyProfile(
       appState: appState,
       config: config,
       clashConfig: clashConfig,
-    ).then((_){
-      appController.appState.checkIpNum++;
+    ).then((_) {
+      globalState.appController.addCheckIpNumDebounce();
     });
   }
 
@@ -106,6 +113,7 @@ class GlobalState {
       config: config,
       isPatch: false,
     );
+    clashCore.setProfileName(config.currentProfile?.label ?? '');
     await updateGroups(appState);
   }
 
@@ -116,6 +124,15 @@ class GlobalState {
   }) async {
     appState.isInit = clashCore.isInit;
     if (!appState.isInit) {
+      if (Platform.isAndroid) {
+        clashCore.setProps(
+          Props(
+            accessControl: config.isAccessControl ? config.accessControl : null,
+            allowBypass: config.allowBypass,
+            systemProxy: config.systemProxy,
+          ),
+        );
+      }
       appState.isInit = await clashService.init(
         config: config,
         clashConfig: clashConfig,
@@ -167,6 +184,22 @@ class GlobalState {
     );
   }
 
+  changeProxy({
+    required Config config,
+    required String groupName,
+    required String proxyName,
+  }) {
+    clashCore.changeProxy(
+      ChangeProxyParams(
+        groupName: groupName,
+        proxyName: proxyName,
+      ),
+    );
+    if(config.isCloseConnections){
+      clashCore.closeConnections();
+    }
+  }
+
   Future<T?> showCommonDialog<T>({
     required Widget child,
   }) async {
@@ -182,20 +215,18 @@ class GlobalState {
 
   updateTraffic({
     AppState? appState,
-    required Config config,
   }) {
     final traffic = clashCore.getTraffic();
-    if (appState != null) {
-      appState.addTraffic(traffic);
-      appState.totalTraffic = clashCore.getTotalTraffic();
-    }
-    if (Platform.isAndroid) {
-      final currentProfile = config.currentProfile;
-      if (currentProfile == null) return;
-      proxyManager.startForeground(
-        title: currentProfile.label ?? currentProfile.id,
+    if (Platform.isAndroid && isVpnService == true) {
+      proxy?.startForeground(
+        title: clashCore.getProfileName(),
         content: "$traffic",
       );
+    } else {
+      if (appState != null) {
+        appState.addTraffic(traffic);
+        appState.totalTraffic = clashCore.getTotalTraffic();
+      }
     }
   }
 
@@ -204,30 +235,30 @@ class GlobalState {
     required String message,
     SnackBarAction? action,
   }) {
-    // final width = context.width;
-    // EdgeInsets margin;
-    // if (width < 600) {
-    //   margin = const EdgeInsets.only(
-    //     bottom: 96,
-    //     right: 16,
-    //     left: 16,
-    //   );
-    // } else {
-    //   margin = EdgeInsets.only(
-    //     bottom: 16,
-    //     left: 16,
-    //     right: width - 316,
-    //   );
-    // }
-    // ScaffoldMessenger.of(context).showSnackBar(
-    //   SnackBar(
-    //     action: action,
-    //     content: Text(message),
-    //     behavior: SnackBarBehavior.floating,
-    //     duration: const Duration(milliseconds: 1500),
-    //     margin: margin,
-    //   ),
-    // );
+    final width = context.width;
+    EdgeInsets margin;
+    if (width < 600) {
+      margin = const EdgeInsets.only(
+        bottom: 16,
+        right: 16,
+        left: 16,
+      );
+    } else {
+      margin = EdgeInsets.only(
+        bottom: 16,
+        left: 16,
+        right: width - 316,
+      );
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        action: action,
+        content: Text(message),
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(milliseconds: 1500),
+        margin: margin,
+      ),
+    );
   }
 
   Future<T?> safeRun<T>(
@@ -248,16 +279,15 @@ class GlobalState {
     }
   }
 
-  int getColumns(ViewMode viewMode, int currentColumns) {
-    final targetColumnsArray = switch (viewMode) {
-      ViewMode.mobile => [2, 1],
-      ViewMode.laptop => [3, 2],
-      ViewMode.desktop => [4, 3],
-    };
-    if (targetColumnsArray.contains(currentColumns)) {
-      return currentColumns;
-    }
-    return targetColumnsArray.first;
+  openUrl(String url) {
+    showMessage(
+      message: TextSpan(text: url),
+      title: appLocalizations.externalLink,
+      confirmText: appLocalizations.go,
+      onTab: () {
+        launchUrl(Uri.parse(url));
+      },
+    );
   }
 }
 

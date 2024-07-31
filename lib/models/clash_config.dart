@@ -2,6 +2,7 @@
 
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
@@ -106,6 +107,8 @@ class Dns {
   }
 }
 
+typedef GeoXMap = Map<String, String>;
+
 @JsonSerializable()
 class ClashConfig extends ChangeNotifier {
   int _mixedPort;
@@ -120,6 +123,7 @@ class ClashConfig extends ChangeNotifier {
   bool _tcpConcurrent;
   Tun _tun;
   Dns _dns;
+  GeoXMap _geoXUrl;
   List<String> _rules;
   String? _globalRealUa;
 
@@ -136,6 +140,7 @@ class ClashConfig extends ChangeNotifier {
         _geodataLoader = geodataLoaderMemconservative,
         _externalController = '',
         _dns = Dns(),
+        _geoXUrl = defaultGeoXMap,
         _rules = [];
 
   @JsonKey(name: "mixed-port", defaultValue: 7890)
@@ -270,7 +275,7 @@ class ClashConfig extends ChangeNotifier {
     }
   }
 
-  @JsonKey(name: "global-ua", defaultValue: null)
+  @JsonKey(name: "global-ua", includeFromJson: false, includeToJson: true)
   String get globalUa {
     if (_globalRealUa == null) {
       return globalState.packageInfo.ua;
@@ -289,6 +294,16 @@ class ClashConfig extends ChangeNotifier {
     }
   }
 
+  @JsonKey(name: "geox-url", defaultValue: defaultGeoXMap)
+  GeoXMap get geoXUrl => _geoXUrl;
+
+  set geoXUrl(GeoXMap value) {
+    if (!const MapEquality<String, String>().equals(value, _geoXUrl)) {
+      _geoXUrl = value;
+      notifyListeners();
+    }
+  }
+
   update([ClashConfig? clashConfig]) {
     if (clashConfig != null) {
       _mixedPort = clashConfig._mixedPort;
@@ -296,9 +311,15 @@ class ClashConfig extends ChangeNotifier {
       _mode = clashConfig._mode;
       _logLevel = clashConfig._logLevel;
       _tun = clashConfig._tun;
+      _findProcessMode = clashConfig._findProcessMode;
+      _geoXUrl = clashConfig._geoXUrl;
+      _unifiedDelay = clashConfig._unifiedDelay;
+      _globalRealUa = clashConfig._globalRealUa;
+      _tcpConcurrent = clashConfig._tcpConcurrent;
+      _externalController = clashConfig._externalController;
+      _geodataLoader = clashConfig._geodataLoader;
       _dns = clashConfig._dns;
       _rules = clashConfig._rules;
-      _globalRealUa = clashConfig.globalRealUa;
     }
     notifyListeners();
   }
