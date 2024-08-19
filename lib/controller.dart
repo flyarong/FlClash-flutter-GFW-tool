@@ -1,8 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
+import 'dart:isolate';
+import 'dart:math';
 
+import 'package:archive/archive.dart';
+import 'package:fl_clash/common/archive.dart';
 import 'package:fl_clash/enum/enum.dart';
 import 'package:fl_clash/state.dart';
 import 'package:flutter/material.dart';
+import 'package:lpinyin/lpinyin.dart';
+import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -17,6 +25,7 @@ class AppController {
   late ClashConfig clashConfig;
   late Measure measure;
   late Function updateClashConfigDebounce;
+  late Function updateGroupDebounce;
   late Function addCheckIpNumDebounce;
 
   AppController(this.context) {
@@ -28,6 +37,9 @@ class AppController {
     });
     addCheckIpNumDebounce = debounce(() {
       appState.checkIpNum++;
+    });
+    updateGroupDebounce = debounce(() async {
+      await updateGroups();
     });
     measure = Measure.of(context);
   }
@@ -45,12 +57,15 @@ class AppController {
         updateRunTime,
         updateTraffic,
       ];
+      if (Platform.isAndroid) return;
+      await applyProfile(isPrue: true);
     } else {
       await globalState.stopSystemProxy();
       clashCore.resetTraffic();
       appState.traffics = [];
       appState.totalTraffic = Traffic();
       appState.runTime = null;
+      addCheckIpNumDebounce();
     }
   }
 
@@ -82,9 +97,7 @@ class AppController {
 
   deleteProfile(String id) async {
     config.deleteProfileById(id);
-    final profilePath = await appPath.getProfilePath(id);
-    if (profilePath == null) return;
-    clashCore.clearEffect(profilePath);
+    clashCore.clearEffect(id);
     if (config.currentProfileId == id) {
       if (config.profiles.isNotEmpty) {
         final updateId = config.profiles.first.id;
@@ -96,8 +109,10 @@ class AppController {
   }
 
   Future<void> updateProfile(Profile profile) async {
-    await profile.update();
-    config.setProfile(await profile.update());
+    final newProfile = await profile.update();
+    config.setProfile(
+      newProfile.copyWith(isUpdating: false),
+    );
   }
 
   Future<void> updateClashConfig({bool isPatch = true}) async {
@@ -108,32 +123,30 @@ class AppController {
     );
   }
 
-  Future applyProfile() async {
-    final commonScaffoldState = globalState.homeScaffoldKey.currentState;
-    if (commonScaffoldState?.mounted != true) return;
-    commonScaffoldState?.loadingRun(() async {
+  Future applyProfile({bool isPrue = false}) async {
+    if (isPrue) {
       await globalState.applyProfile(
         appState: appState,
         config: config,
         clashConfig: clashConfig,
       );
-    });
-  }
-
-  Future rawApplyProfile() async {
-    await globalState.applyProfile(
-      appState: appState,
-      config: config,
-      clashConfig: clashConfig,
-    );
+    } else {
+      final commonScaffoldState = globalState.homeScaffoldKey.currentState;
+      if (commonScaffoldState?.mounted != true) return;
+      await commonScaffoldState?.loadingRun(() async {
+        await globalState.applyProfile(
+          appState: appState,
+          config: config,
+          clashConfig: clashConfig,
+        );
+      });
+    }
+    addCheckIpNumDebounce();
   }
 
   changeProfile(String? value) async {
     if (value == config.currentProfileId) return;
     config.currentProfileId = value;
-    await applyProfile();
-    appState.delayMap = {};
-    saveConfigPreferences();
   }
 
   autoUpdateProfiles() async {
@@ -192,8 +205,19 @@ class AppController {
     await preferences.saveClashConfig(clashConfig);
   }
 
+  changeProxy({
+    required String groupName,
+    required String proxyName,
+  }) {
+    globalState.changeProxy(
+      config: config,
+      groupName: groupName,
+      proxyName: proxyName,
+    );
+    addCheckIpNumDebounce();
+  }
+
   handleBackOrExit() async {
-    print(config.isMinimizeOnExit);
     if (config.isMinimizeOnExit) {
       if (system.isDesktop) {
         await savePreferences();
@@ -274,26 +298,6 @@ class AppController {
     if (!config.silentLaunch) {
       window?.show();
     }
-    final commonScaffoldState = globalState.homeScaffoldKey.currentState;
-    if (commonScaffoldState?.mounted == true) {
-      await commonScaffoldState?.loadingRun(() async {
-        await globalState.applyProfile(
-          appState: appState,
-          config: config,
-          clashConfig: clashConfig,
-        );
-      }, title: appLocalizations.init);
-    } else {
-      await globalState.applyProfile(
-        appState: appState,
-        config: config,
-        clashConfig: clashConfig,
-      );
-    }
-    await afterInit();
-  }
-
-  afterInit() async {
     await proxyManager.updateStartTime();
     if (proxyManager.isStart) {
       await updateSystemProxy(true);
@@ -383,7 +387,11 @@ class AppController {
   }
 
   addProfileFormFile() async {
-    final platformFile = await globalState.safeRun(picker.pickerConfigFile);
+    final platformFile = await globalState.safeRun(picker.pickerFile);
+    final bytes = platformFile?.bytes;
+    if (bytes == null) {
+      return null;
+    }
     if (!context.mounted) return;
     globalState.navigatorKey.currentState?.popUntil((route) => route.isFirst);
     toProfiles();
@@ -392,10 +400,6 @@ class AppController {
     final profile = await commonScaffoldState?.loadingRun<Profile?>(
       () async {
         await Future.delayed(const Duration(milliseconds: 300));
-        final bytes = platformFile?.bytes;
-        if (bytes == null) {
-          return null;
-        }
         return await Profile.normal(label: platformFile?.name).saveFile(bytes);
       },
       title: "${appLocalizations.add}${appLocalizations.profile}",
@@ -411,7 +415,6 @@ class AppController {
     addProfileFormURL(url);
   }
 
-  int get columns => other.getColumns(appState.viewMode, config.proxiesColumns);
 
   updateViewWidth(double width) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -422,7 +425,10 @@ class AppController {
   List<Proxy> _sortOfName(List<Proxy> proxies) {
     return List.of(proxies)
       ..sort(
-        (a, b) => other.sortByChar(a.name, b.name),
+        (a, b) => other.sortByChar(
+          PinyinHelper.getPinyin(a.name),
+          PinyinHelper.getPinyin(b.name),
+        ),
       );
   }
 
@@ -456,6 +462,67 @@ class AppController {
 
   String getCurrentSelectedName(String groupName) {
     final group = appState.getGroupWithName(groupName);
-    return config.currentSelectedMap[groupName] ?? group?.now ?? '';
+    return group?.getCurrentSelectedName(
+            config.currentSelectedMap[groupName] ?? '') ??
+        '';
+  }
+
+  Future<List<int>> backupData() async {
+    final homeDirPath = await appPath.getHomeDirPath();
+    final profilesPath = await appPath.getProfilesPath();
+    final configJson = config.toJson();
+    final clashConfigJson = clashConfig.toJson();
+    return Isolate.run<List<int>>(() async {
+      final archive = Archive();
+      archive.add("config.json", configJson);
+      archive.add("clashConfig.json", clashConfigJson);
+      await archive.addDirectoryToArchive(profilesPath, homeDirPath);
+      final zipEncoder = ZipEncoder();
+      return zipEncoder.encode(archive) ?? [];
+    });
+  }
+
+  recoveryData(
+    List<int> data,
+    RecoveryOption recoveryOption,
+  ) async {
+    final archive = await Isolate.run<Archive>(() {
+      final zipDecoder = ZipDecoder();
+      return zipDecoder.decodeBytes(data);
+    });
+    final homeDirPath = await appPath.getHomeDirPath();
+    final configs =
+        archive.files.where((item) => item.name.endsWith(".json")).toList();
+    final profiles =
+        archive.files.where((item) => !item.name.endsWith(".json"));
+    final configIndex =
+        configs.indexWhere((config) => config.name == "config.json");
+    final clashConfigIndex =
+        configs.indexWhere((config) => config.name == "clashConfig.json");
+    if (configIndex == -1 || clashConfigIndex == -1) throw "invalid backup.zip";
+    final configFile = configs[configIndex];
+    final clashConfigFile = configs[clashConfigIndex];
+    final tempConfig = Config.fromJson(
+      json.decode(
+        utf8.decode(configFile.content),
+      ),
+    );
+    final tempClashConfig = ClashConfig.fromJson(
+      json.decode(
+        utf8.decode(clashConfigFile.content),
+      ),
+    );
+    for (final profile in profiles) {
+      final filePath = join(homeDirPath, profile.name);
+      final file = File(filePath);
+      await file.create(recursive: true);
+      await file.writeAsBytes(profile.content);
+    }
+    if (recoveryOption == RecoveryOption.onlyProfiles) {
+      config.update(tempConfig, RecoveryOption.onlyProfiles);
+    } else {
+      config.update(tempConfig, RecoveryOption.all);
+      clashConfig.update(tempClashConfig);
+    }
   }
 }

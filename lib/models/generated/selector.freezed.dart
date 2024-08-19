@@ -158,10 +158,8 @@ abstract class _StartButtonSelectorState implements StartButtonSelectorState {
 
 /// @nodoc
 mixin _$CheckIpSelectorState {
-  bool get isInit => throw _privateConstructorUsedError;
-  bool get isStart => throw _privateConstructorUsedError;
+  String? get currentProfileId => throw _privateConstructorUsedError;
   Map<String, String> get selectedMap => throw _privateConstructorUsedError;
-  num get checkIpNum => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $CheckIpSelectorStateCopyWith<CheckIpSelectorState> get copyWith =>
@@ -174,11 +172,7 @@ abstract class $CheckIpSelectorStateCopyWith<$Res> {
           $Res Function(CheckIpSelectorState) then) =
       _$CheckIpSelectorStateCopyWithImpl<$Res, CheckIpSelectorState>;
   @useResult
-  $Res call(
-      {bool isInit,
-      bool isStart,
-      Map<String, String> selectedMap,
-      num checkIpNum});
+  $Res call({String? currentProfileId, Map<String, String> selectedMap});
 }
 
 /// @nodoc
@@ -195,28 +189,18 @@ class _$CheckIpSelectorStateCopyWithImpl<$Res,
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? isInit = null,
-    Object? isStart = null,
+    Object? currentProfileId = freezed,
     Object? selectedMap = null,
-    Object? checkIpNum = null,
   }) {
     return _then(_value.copyWith(
-      isInit: null == isInit
-          ? _value.isInit
-          : isInit // ignore: cast_nullable_to_non_nullable
-              as bool,
-      isStart: null == isStart
-          ? _value.isStart
-          : isStart // ignore: cast_nullable_to_non_nullable
-              as bool,
+      currentProfileId: freezed == currentProfileId
+          ? _value.currentProfileId
+          : currentProfileId // ignore: cast_nullable_to_non_nullable
+              as String?,
       selectedMap: null == selectedMap
           ? _value.selectedMap
           : selectedMap // ignore: cast_nullable_to_non_nullable
               as Map<String, String>,
-      checkIpNum: null == checkIpNum
-          ? _value.checkIpNum
-          : checkIpNum // ignore: cast_nullable_to_non_nullable
-              as num,
     ) as $Val);
   }
 }
@@ -229,11 +213,7 @@ abstract class _$$CheckIpSelectorStateImplCopyWith<$Res>
       __$$CheckIpSelectorStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {bool isInit,
-      bool isStart,
-      Map<String, String> selectedMap,
-      num checkIpNum});
+  $Res call({String? currentProfileId, Map<String, String> selectedMap});
 }
 
 /// @nodoc
@@ -247,28 +227,18 @@ class __$$CheckIpSelectorStateImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? isInit = null,
-    Object? isStart = null,
+    Object? currentProfileId = freezed,
     Object? selectedMap = null,
-    Object? checkIpNum = null,
   }) {
     return _then(_$CheckIpSelectorStateImpl(
-      isInit: null == isInit
-          ? _value.isInit
-          : isInit // ignore: cast_nullable_to_non_nullable
-              as bool,
-      isStart: null == isStart
-          ? _value.isStart
-          : isStart // ignore: cast_nullable_to_non_nullable
-              as bool,
+      currentProfileId: freezed == currentProfileId
+          ? _value.currentProfileId
+          : currentProfileId // ignore: cast_nullable_to_non_nullable
+              as String?,
       selectedMap: null == selectedMap
           ? _value._selectedMap
           : selectedMap // ignore: cast_nullable_to_non_nullable
               as Map<String, String>,
-      checkIpNum: null == checkIpNum
-          ? _value.checkIpNum
-          : checkIpNum // ignore: cast_nullable_to_non_nullable
-              as num,
     ));
   }
 }
@@ -277,16 +247,12 @@ class __$$CheckIpSelectorStateImplCopyWithImpl<$Res>
 
 class _$CheckIpSelectorStateImpl implements _CheckIpSelectorState {
   const _$CheckIpSelectorStateImpl(
-      {required this.isInit,
-      required this.isStart,
-      required final Map<String, String> selectedMap,
-      required this.checkIpNum})
+      {required this.currentProfileId,
+      required final Map<String, String> selectedMap})
       : _selectedMap = selectedMap;
 
   @override
-  final bool isInit;
-  @override
-  final bool isStart;
+  final String? currentProfileId;
   final Map<String, String> _selectedMap;
   @override
   Map<String, String> get selectedMap {
@@ -296,11 +262,8 @@ class _$CheckIpSelectorStateImpl implements _CheckIpSelectorState {
   }
 
   @override
-  final num checkIpNum;
-
-  @override
   String toString() {
-    return 'CheckIpSelectorState(isInit: $isInit, isStart: $isStart, selectedMap: $selectedMap, checkIpNum: $checkIpNum)';
+    return 'CheckIpSelectorState(currentProfileId: $currentProfileId, selectedMap: $selectedMap)';
   }
 
   @override
@@ -308,17 +271,15 @@ class _$CheckIpSelectorStateImpl implements _CheckIpSelectorState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$CheckIpSelectorStateImpl &&
-            (identical(other.isInit, isInit) || other.isInit == isInit) &&
-            (identical(other.isStart, isStart) || other.isStart == isStart) &&
+            (identical(other.currentProfileId, currentProfileId) ||
+                other.currentProfileId == currentProfileId) &&
             const DeepCollectionEquality()
-                .equals(other._selectedMap, _selectedMap) &&
-            (identical(other.checkIpNum, checkIpNum) ||
-                other.checkIpNum == checkIpNum));
+                .equals(other._selectedMap, _selectedMap));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, isInit, isStart,
-      const DeepCollectionEquality().hash(_selectedMap), checkIpNum);
+  int get hashCode => Object.hash(runtimeType, currentProfileId,
+      const DeepCollectionEquality().hash(_selectedMap));
 
   @JsonKey(ignore: true)
   @override
@@ -331,19 +292,14 @@ class _$CheckIpSelectorStateImpl implements _CheckIpSelectorState {
 
 abstract class _CheckIpSelectorState implements CheckIpSelectorState {
   const factory _CheckIpSelectorState(
-      {required final bool isInit,
-      required final bool isStart,
-      required final Map<String, String> selectedMap,
-      required final num checkIpNum}) = _$CheckIpSelectorStateImpl;
+          {required final String? currentProfileId,
+          required final Map<String, String> selectedMap}) =
+      _$CheckIpSelectorStateImpl;
 
   @override
-  bool get isInit;
-  @override
-  bool get isStart;
+  String? get currentProfileId;
   @override
   Map<String, String> get selectedMap;
-  @override
-  num get checkIpNum;
   @override
   @JsonKey(ignore: true)
   _$$CheckIpSelectorStateImplCopyWith<_$CheckIpSelectorStateImpl>
@@ -502,7 +458,7 @@ abstract class _NetworkDetectionSelectorState
 mixin _$ProfilesSelectorState {
   List<Profile> get profiles => throw _privateConstructorUsedError;
   String? get currentProfileId => throw _privateConstructorUsedError;
-  ViewMode get viewMode => throw _privateConstructorUsedError;
+  int get columns => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $ProfilesSelectorStateCopyWith<ProfilesSelectorState> get copyWith =>
@@ -515,8 +471,7 @@ abstract class $ProfilesSelectorStateCopyWith<$Res> {
           $Res Function(ProfilesSelectorState) then) =
       _$ProfilesSelectorStateCopyWithImpl<$Res, ProfilesSelectorState>;
   @useResult
-  $Res call(
-      {List<Profile> profiles, String? currentProfileId, ViewMode viewMode});
+  $Res call({List<Profile> profiles, String? currentProfileId, int columns});
 }
 
 /// @nodoc
@@ -535,7 +490,7 @@ class _$ProfilesSelectorStateCopyWithImpl<$Res,
   $Res call({
     Object? profiles = null,
     Object? currentProfileId = freezed,
-    Object? viewMode = null,
+    Object? columns = null,
   }) {
     return _then(_value.copyWith(
       profiles: null == profiles
@@ -546,10 +501,10 @@ class _$ProfilesSelectorStateCopyWithImpl<$Res,
           ? _value.currentProfileId
           : currentProfileId // ignore: cast_nullable_to_non_nullable
               as String?,
-      viewMode: null == viewMode
-          ? _value.viewMode
-          : viewMode // ignore: cast_nullable_to_non_nullable
-              as ViewMode,
+      columns: null == columns
+          ? _value.columns
+          : columns // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 }
@@ -563,8 +518,7 @@ abstract class _$$ProfilesSelectorStateImplCopyWith<$Res>
       __$$ProfilesSelectorStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call(
-      {List<Profile> profiles, String? currentProfileId, ViewMode viewMode});
+  $Res call({List<Profile> profiles, String? currentProfileId, int columns});
 }
 
 /// @nodoc
@@ -581,7 +535,7 @@ class __$$ProfilesSelectorStateImplCopyWithImpl<$Res>
   $Res call({
     Object? profiles = null,
     Object? currentProfileId = freezed,
-    Object? viewMode = null,
+    Object? columns = null,
   }) {
     return _then(_$ProfilesSelectorStateImpl(
       profiles: null == profiles
@@ -592,10 +546,10 @@ class __$$ProfilesSelectorStateImplCopyWithImpl<$Res>
           ? _value.currentProfileId
           : currentProfileId // ignore: cast_nullable_to_non_nullable
               as String?,
-      viewMode: null == viewMode
-          ? _value.viewMode
-          : viewMode // ignore: cast_nullable_to_non_nullable
-              as ViewMode,
+      columns: null == columns
+          ? _value.columns
+          : columns // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -606,7 +560,7 @@ class _$ProfilesSelectorStateImpl implements _ProfilesSelectorState {
   const _$ProfilesSelectorStateImpl(
       {required final List<Profile> profiles,
       required this.currentProfileId,
-      required this.viewMode})
+      required this.columns})
       : _profiles = profiles;
 
   final List<Profile> _profiles;
@@ -620,11 +574,11 @@ class _$ProfilesSelectorStateImpl implements _ProfilesSelectorState {
   @override
   final String? currentProfileId;
   @override
-  final ViewMode viewMode;
+  final int columns;
 
   @override
   String toString() {
-    return 'ProfilesSelectorState(profiles: $profiles, currentProfileId: $currentProfileId, viewMode: $viewMode)';
+    return 'ProfilesSelectorState(profiles: $profiles, currentProfileId: $currentProfileId, columns: $columns)';
   }
 
   @override
@@ -635,8 +589,7 @@ class _$ProfilesSelectorStateImpl implements _ProfilesSelectorState {
             const DeepCollectionEquality().equals(other._profiles, _profiles) &&
             (identical(other.currentProfileId, currentProfileId) ||
                 other.currentProfileId == currentProfileId) &&
-            (identical(other.viewMode, viewMode) ||
-                other.viewMode == viewMode));
+            (identical(other.columns, columns) || other.columns == columns));
   }
 
   @override
@@ -644,7 +597,7 @@ class _$ProfilesSelectorStateImpl implements _ProfilesSelectorState {
       runtimeType,
       const DeepCollectionEquality().hash(_profiles),
       currentProfileId,
-      viewMode);
+      columns);
 
   @JsonKey(ignore: true)
   @override
@@ -658,14 +611,14 @@ abstract class _ProfilesSelectorState implements ProfilesSelectorState {
   const factory _ProfilesSelectorState(
       {required final List<Profile> profiles,
       required final String? currentProfileId,
-      required final ViewMode viewMode}) = _$ProfilesSelectorStateImpl;
+      required final int columns}) = _$ProfilesSelectorStateImpl;
 
   @override
   List<Profile> get profiles;
   @override
   String? get currentProfileId;
   @override
-  ViewMode get viewMode;
+  int get columns;
   @override
   @JsonKey(ignore: true)
   _$$ProfilesSelectorStateImplCopyWith<_$ProfilesSelectorStateImpl>
@@ -677,6 +630,7 @@ mixin _$ApplicationSelectorState {
   String? get locale => throw _privateConstructorUsedError;
   ThemeMode? get themeMode => throw _privateConstructorUsedError;
   int? get primaryColor => throw _privateConstructorUsedError;
+  bool get prueBlack => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $ApplicationSelectorStateCopyWith<ApplicationSelectorState> get copyWith =>
@@ -689,7 +643,11 @@ abstract class $ApplicationSelectorStateCopyWith<$Res> {
           $Res Function(ApplicationSelectorState) then) =
       _$ApplicationSelectorStateCopyWithImpl<$Res, ApplicationSelectorState>;
   @useResult
-  $Res call({String? locale, ThemeMode? themeMode, int? primaryColor});
+  $Res call(
+      {String? locale,
+      ThemeMode? themeMode,
+      int? primaryColor,
+      bool prueBlack});
 }
 
 /// @nodoc
@@ -709,6 +667,7 @@ class _$ApplicationSelectorStateCopyWithImpl<$Res,
     Object? locale = freezed,
     Object? themeMode = freezed,
     Object? primaryColor = freezed,
+    Object? prueBlack = null,
   }) {
     return _then(_value.copyWith(
       locale: freezed == locale
@@ -723,6 +682,10 @@ class _$ApplicationSelectorStateCopyWithImpl<$Res,
           ? _value.primaryColor
           : primaryColor // ignore: cast_nullable_to_non_nullable
               as int?,
+      prueBlack: null == prueBlack
+          ? _value.prueBlack
+          : prueBlack // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -736,7 +699,11 @@ abstract class _$$ApplicationSelectorStateImplCopyWith<$Res>
       __$$ApplicationSelectorStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String? locale, ThemeMode? themeMode, int? primaryColor});
+  $Res call(
+      {String? locale,
+      ThemeMode? themeMode,
+      int? primaryColor,
+      bool prueBlack});
 }
 
 /// @nodoc
@@ -755,6 +722,7 @@ class __$$ApplicationSelectorStateImplCopyWithImpl<$Res>
     Object? locale = freezed,
     Object? themeMode = freezed,
     Object? primaryColor = freezed,
+    Object? prueBlack = null,
   }) {
     return _then(_$ApplicationSelectorStateImpl(
       locale: freezed == locale
@@ -769,6 +737,10 @@ class __$$ApplicationSelectorStateImplCopyWithImpl<$Res>
           ? _value.primaryColor
           : primaryColor // ignore: cast_nullable_to_non_nullable
               as int?,
+      prueBlack: null == prueBlack
+          ? _value.prueBlack
+          : prueBlack // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -777,7 +749,10 @@ class __$$ApplicationSelectorStateImplCopyWithImpl<$Res>
 
 class _$ApplicationSelectorStateImpl implements _ApplicationSelectorState {
   const _$ApplicationSelectorStateImpl(
-      {this.locale, this.themeMode, this.primaryColor});
+      {required this.locale,
+      required this.themeMode,
+      required this.primaryColor,
+      required this.prueBlack});
 
   @override
   final String? locale;
@@ -785,10 +760,12 @@ class _$ApplicationSelectorStateImpl implements _ApplicationSelectorState {
   final ThemeMode? themeMode;
   @override
   final int? primaryColor;
+  @override
+  final bool prueBlack;
 
   @override
   String toString() {
-    return 'ApplicationSelectorState(locale: $locale, themeMode: $themeMode, primaryColor: $primaryColor)';
+    return 'ApplicationSelectorState(locale: $locale, themeMode: $themeMode, primaryColor: $primaryColor, prueBlack: $prueBlack)';
   }
 
   @override
@@ -800,11 +777,14 @@ class _$ApplicationSelectorStateImpl implements _ApplicationSelectorState {
             (identical(other.themeMode, themeMode) ||
                 other.themeMode == themeMode) &&
             (identical(other.primaryColor, primaryColor) ||
-                other.primaryColor == primaryColor));
+                other.primaryColor == primaryColor) &&
+            (identical(other.prueBlack, prueBlack) ||
+                other.prueBlack == prueBlack));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, locale, themeMode, primaryColor);
+  int get hashCode =>
+      Object.hash(runtimeType, locale, themeMode, primaryColor, prueBlack);
 
   @JsonKey(ignore: true)
   @override
@@ -816,9 +796,10 @@ class _$ApplicationSelectorStateImpl implements _ApplicationSelectorState {
 
 abstract class _ApplicationSelectorState implements ApplicationSelectorState {
   const factory _ApplicationSelectorState(
-      {final String? locale,
-      final ThemeMode? themeMode,
-      final int? primaryColor}) = _$ApplicationSelectorStateImpl;
+      {required final String? locale,
+      required final ThemeMode? themeMode,
+      required final int? primaryColor,
+      required final bool prueBlack}) = _$ApplicationSelectorStateImpl;
 
   @override
   String? get locale;
@@ -826,6 +807,8 @@ abstract class _ApplicationSelectorState implements ApplicationSelectorState {
   ThemeMode? get themeMode;
   @override
   int? get primaryColor;
+  @override
+  bool get prueBlack;
   @override
   @JsonKey(ignore: true)
   _$$ApplicationSelectorStateImplCopyWith<_$ApplicationSelectorStateImpl>
@@ -2012,6 +1995,7 @@ mixin _$ProxyGroupSelectorState {
   ProxiesSortType get proxiesSortType => throw _privateConstructorUsedError;
   ProxyCardType get proxyCardType => throw _privateConstructorUsedError;
   num get sortNum => throw _privateConstructorUsedError;
+  GroupType get groupType => throw _privateConstructorUsedError;
   List<Proxy> get proxies => throw _privateConstructorUsedError;
   int get columns => throw _privateConstructorUsedError;
 
@@ -2030,6 +2014,7 @@ abstract class $ProxyGroupSelectorStateCopyWith<$Res> {
       {ProxiesSortType proxiesSortType,
       ProxyCardType proxyCardType,
       num sortNum,
+      GroupType groupType,
       List<Proxy> proxies,
       int columns});
 }
@@ -2051,6 +2036,7 @@ class _$ProxyGroupSelectorStateCopyWithImpl<$Res,
     Object? proxiesSortType = null,
     Object? proxyCardType = null,
     Object? sortNum = null,
+    Object? groupType = null,
     Object? proxies = null,
     Object? columns = null,
   }) {
@@ -2067,6 +2053,10 @@ class _$ProxyGroupSelectorStateCopyWithImpl<$Res,
           ? _value.sortNum
           : sortNum // ignore: cast_nullable_to_non_nullable
               as num,
+      groupType: null == groupType
+          ? _value.groupType
+          : groupType // ignore: cast_nullable_to_non_nullable
+              as GroupType,
       proxies: null == proxies
           ? _value.proxies
           : proxies // ignore: cast_nullable_to_non_nullable
@@ -2092,6 +2082,7 @@ abstract class _$$ProxyGroupSelectorStateImplCopyWith<$Res>
       {ProxiesSortType proxiesSortType,
       ProxyCardType proxyCardType,
       num sortNum,
+      GroupType groupType,
       List<Proxy> proxies,
       int columns});
 }
@@ -2112,6 +2103,7 @@ class __$$ProxyGroupSelectorStateImplCopyWithImpl<$Res>
     Object? proxiesSortType = null,
     Object? proxyCardType = null,
     Object? sortNum = null,
+    Object? groupType = null,
     Object? proxies = null,
     Object? columns = null,
   }) {
@@ -2128,6 +2120,10 @@ class __$$ProxyGroupSelectorStateImplCopyWithImpl<$Res>
           ? _value.sortNum
           : sortNum // ignore: cast_nullable_to_non_nullable
               as num,
+      groupType: null == groupType
+          ? _value.groupType
+          : groupType // ignore: cast_nullable_to_non_nullable
+              as GroupType,
       proxies: null == proxies
           ? _value._proxies
           : proxies // ignore: cast_nullable_to_non_nullable
@@ -2147,6 +2143,7 @@ class _$ProxyGroupSelectorStateImpl implements _ProxyGroupSelectorState {
       {required this.proxiesSortType,
       required this.proxyCardType,
       required this.sortNum,
+      required this.groupType,
       required final List<Proxy> proxies,
       required this.columns})
       : _proxies = proxies;
@@ -2157,6 +2154,8 @@ class _$ProxyGroupSelectorStateImpl implements _ProxyGroupSelectorState {
   final ProxyCardType proxyCardType;
   @override
   final num sortNum;
+  @override
+  final GroupType groupType;
   final List<Proxy> _proxies;
   @override
   List<Proxy> get proxies {
@@ -2170,7 +2169,7 @@ class _$ProxyGroupSelectorStateImpl implements _ProxyGroupSelectorState {
 
   @override
   String toString() {
-    return 'ProxyGroupSelectorState(proxiesSortType: $proxiesSortType, proxyCardType: $proxyCardType, sortNum: $sortNum, proxies: $proxies, columns: $columns)';
+    return 'ProxyGroupSelectorState(proxiesSortType: $proxiesSortType, proxyCardType: $proxyCardType, sortNum: $sortNum, groupType: $groupType, proxies: $proxies, columns: $columns)';
   }
 
   @override
@@ -2183,13 +2182,21 @@ class _$ProxyGroupSelectorStateImpl implements _ProxyGroupSelectorState {
             (identical(other.proxyCardType, proxyCardType) ||
                 other.proxyCardType == proxyCardType) &&
             (identical(other.sortNum, sortNum) || other.sortNum == sortNum) &&
+            (identical(other.groupType, groupType) ||
+                other.groupType == groupType) &&
             const DeepCollectionEquality().equals(other._proxies, _proxies) &&
             (identical(other.columns, columns) || other.columns == columns));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, proxiesSortType, proxyCardType,
-      sortNum, const DeepCollectionEquality().hash(_proxies), columns);
+  int get hashCode => Object.hash(
+      runtimeType,
+      proxiesSortType,
+      proxyCardType,
+      sortNum,
+      groupType,
+      const DeepCollectionEquality().hash(_proxies),
+      columns);
 
   @JsonKey(ignore: true)
   @override
@@ -2204,6 +2211,7 @@ abstract class _ProxyGroupSelectorState implements ProxyGroupSelectorState {
       {required final ProxiesSortType proxiesSortType,
       required final ProxyCardType proxyCardType,
       required final num sortNum,
+      required final GroupType groupType,
       required final List<Proxy> proxies,
       required final int columns}) = _$ProxyGroupSelectorStateImpl;
 
@@ -2213,6 +2221,8 @@ abstract class _ProxyGroupSelectorState implements ProxyGroupSelectorState {
   ProxyCardType get proxyCardType;
   @override
   num get sortNum;
+  @override
+  GroupType get groupType;
   @override
   List<Proxy> get proxies;
   @override
@@ -2359,6 +2369,7 @@ abstract class _MoreToolsSelectorState implements MoreToolsSelectorState {
 
 /// @nodoc
 mixin _$PackageListSelectorState {
+  List<Package> get packages => throw _privateConstructorUsedError;
   AccessControl get accessControl => throw _privateConstructorUsedError;
   bool get isAccessControl => throw _privateConstructorUsedError;
 
@@ -2373,7 +2384,10 @@ abstract class $PackageListSelectorStateCopyWith<$Res> {
           $Res Function(PackageListSelectorState) then) =
       _$PackageListSelectorStateCopyWithImpl<$Res, PackageListSelectorState>;
   @useResult
-  $Res call({AccessControl accessControl, bool isAccessControl});
+  $Res call(
+      {List<Package> packages,
+      AccessControl accessControl,
+      bool isAccessControl});
 
   $AccessControlCopyWith<$Res> get accessControl;
 }
@@ -2392,10 +2406,15 @@ class _$PackageListSelectorStateCopyWithImpl<$Res,
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? packages = null,
     Object? accessControl = null,
     Object? isAccessControl = null,
   }) {
     return _then(_value.copyWith(
+      packages: null == packages
+          ? _value.packages
+          : packages // ignore: cast_nullable_to_non_nullable
+              as List<Package>,
       accessControl: null == accessControl
           ? _value.accessControl
           : accessControl // ignore: cast_nullable_to_non_nullable
@@ -2425,7 +2444,10 @@ abstract class _$$PackageListSelectorStateImplCopyWith<$Res>
       __$$PackageListSelectorStateImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({AccessControl accessControl, bool isAccessControl});
+  $Res call(
+      {List<Package> packages,
+      AccessControl accessControl,
+      bool isAccessControl});
 
   @override
   $AccessControlCopyWith<$Res> get accessControl;
@@ -2444,10 +2466,15 @@ class __$$PackageListSelectorStateImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? packages = null,
     Object? accessControl = null,
     Object? isAccessControl = null,
   }) {
     return _then(_$PackageListSelectorStateImpl(
+      packages: null == packages
+          ? _value._packages
+          : packages // ignore: cast_nullable_to_non_nullable
+              as List<Package>,
       accessControl: null == accessControl
           ? _value.accessControl
           : accessControl // ignore: cast_nullable_to_non_nullable
@@ -2464,7 +2491,18 @@ class __$$PackageListSelectorStateImplCopyWithImpl<$Res>
 
 class _$PackageListSelectorStateImpl implements _PackageListSelectorState {
   const _$PackageListSelectorStateImpl(
-      {required this.accessControl, required this.isAccessControl});
+      {required final List<Package> packages,
+      required this.accessControl,
+      required this.isAccessControl})
+      : _packages = packages;
+
+  final List<Package> _packages;
+  @override
+  List<Package> get packages {
+    if (_packages is EqualUnmodifiableListView) return _packages;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_packages);
+  }
 
   @override
   final AccessControl accessControl;
@@ -2473,7 +2511,7 @@ class _$PackageListSelectorStateImpl implements _PackageListSelectorState {
 
   @override
   String toString() {
-    return 'PackageListSelectorState(accessControl: $accessControl, isAccessControl: $isAccessControl)';
+    return 'PackageListSelectorState(packages: $packages, accessControl: $accessControl, isAccessControl: $isAccessControl)';
   }
 
   @override
@@ -2481,6 +2519,7 @@ class _$PackageListSelectorStateImpl implements _PackageListSelectorState {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$PackageListSelectorStateImpl &&
+            const DeepCollectionEquality().equals(other._packages, _packages) &&
             (identical(other.accessControl, accessControl) ||
                 other.accessControl == accessControl) &&
             (identical(other.isAccessControl, isAccessControl) ||
@@ -2488,7 +2527,11 @@ class _$PackageListSelectorStateImpl implements _PackageListSelectorState {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, accessControl, isAccessControl);
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(_packages),
+      accessControl,
+      isAccessControl);
 
   @JsonKey(ignore: true)
   @override
@@ -2500,9 +2543,12 @@ class _$PackageListSelectorStateImpl implements _PackageListSelectorState {
 
 abstract class _PackageListSelectorState implements PackageListSelectorState {
   const factory _PackageListSelectorState(
-      {required final AccessControl accessControl,
+      {required final List<Package> packages,
+      required final AccessControl accessControl,
       required final bool isAccessControl}) = _$PackageListSelectorStateImpl;
 
+  @override
+  List<Package> get packages;
   @override
   AccessControl get accessControl;
   @override
@@ -2510,146 +2556,6 @@ abstract class _PackageListSelectorState implements PackageListSelectorState {
   @override
   @JsonKey(ignore: true)
   _$$PackageListSelectorStateImplCopyWith<_$PackageListSelectorStateImpl>
-      get copyWith => throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-mixin _$ColumnsSelectorState {
-  int get columns => throw _privateConstructorUsedError;
-  ViewMode get viewMode => throw _privateConstructorUsedError;
-
-  @JsonKey(ignore: true)
-  $ColumnsSelectorStateCopyWith<ColumnsSelectorState> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $ColumnsSelectorStateCopyWith<$Res> {
-  factory $ColumnsSelectorStateCopyWith(ColumnsSelectorState value,
-          $Res Function(ColumnsSelectorState) then) =
-      _$ColumnsSelectorStateCopyWithImpl<$Res, ColumnsSelectorState>;
-  @useResult
-  $Res call({int columns, ViewMode viewMode});
-}
-
-/// @nodoc
-class _$ColumnsSelectorStateCopyWithImpl<$Res,
-        $Val extends ColumnsSelectorState>
-    implements $ColumnsSelectorStateCopyWith<$Res> {
-  _$ColumnsSelectorStateCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? columns = null,
-    Object? viewMode = null,
-  }) {
-    return _then(_value.copyWith(
-      columns: null == columns
-          ? _value.columns
-          : columns // ignore: cast_nullable_to_non_nullable
-              as int,
-      viewMode: null == viewMode
-          ? _value.viewMode
-          : viewMode // ignore: cast_nullable_to_non_nullable
-              as ViewMode,
-    ) as $Val);
-  }
-}
-
-/// @nodoc
-abstract class _$$ColumnsSelectorStateImplCopyWith<$Res>
-    implements $ColumnsSelectorStateCopyWith<$Res> {
-  factory _$$ColumnsSelectorStateImplCopyWith(_$ColumnsSelectorStateImpl value,
-          $Res Function(_$ColumnsSelectorStateImpl) then) =
-      __$$ColumnsSelectorStateImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({int columns, ViewMode viewMode});
-}
-
-/// @nodoc
-class __$$ColumnsSelectorStateImplCopyWithImpl<$Res>
-    extends _$ColumnsSelectorStateCopyWithImpl<$Res, _$ColumnsSelectorStateImpl>
-    implements _$$ColumnsSelectorStateImplCopyWith<$Res> {
-  __$$ColumnsSelectorStateImplCopyWithImpl(_$ColumnsSelectorStateImpl _value,
-      $Res Function(_$ColumnsSelectorStateImpl) _then)
-      : super(_value, _then);
-
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? columns = null,
-    Object? viewMode = null,
-  }) {
-    return _then(_$ColumnsSelectorStateImpl(
-      columns: null == columns
-          ? _value.columns
-          : columns // ignore: cast_nullable_to_non_nullable
-              as int,
-      viewMode: null == viewMode
-          ? _value.viewMode
-          : viewMode // ignore: cast_nullable_to_non_nullable
-              as ViewMode,
-    ));
-  }
-}
-
-/// @nodoc
-
-class _$ColumnsSelectorStateImpl implements _ColumnsSelectorState {
-  const _$ColumnsSelectorStateImpl(
-      {required this.columns, required this.viewMode});
-
-  @override
-  final int columns;
-  @override
-  final ViewMode viewMode;
-
-  @override
-  String toString() {
-    return 'ColumnsSelectorState(columns: $columns, viewMode: $viewMode)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$ColumnsSelectorStateImpl &&
-            (identical(other.columns, columns) || other.columns == columns) &&
-            (identical(other.viewMode, viewMode) ||
-                other.viewMode == viewMode));
-  }
-
-  @override
-  int get hashCode => Object.hash(runtimeType, columns, viewMode);
-
-  @JsonKey(ignore: true)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$ColumnsSelectorStateImplCopyWith<_$ColumnsSelectorStateImpl>
-      get copyWith =>
-          __$$ColumnsSelectorStateImplCopyWithImpl<_$ColumnsSelectorStateImpl>(
-              this, _$identity);
-}
-
-abstract class _ColumnsSelectorState implements ColumnsSelectorState {
-  const factory _ColumnsSelectorState(
-      {required final int columns,
-      required final ViewMode viewMode}) = _$ColumnsSelectorStateImpl;
-
-  @override
-  int get columns;
-  @override
-  ViewMode get viewMode;
-  @override
-  @JsonKey(ignore: true)
-  _$$ColumnsSelectorStateImplCopyWith<_$ColumnsSelectorStateImpl>
       get copyWith => throw _privateConstructorUsedError;
 }
 
@@ -2799,4 +2705,143 @@ abstract class _ProxiesListHeaderSelectorState
   _$$ProxiesListHeaderSelectorStateImplCopyWith<
           _$ProxiesListHeaderSelectorStateImpl>
       get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+mixin _$ProxiesActionsState {
+  bool get isCurrent => throw _privateConstructorUsedError;
+  bool get hasProvider => throw _privateConstructorUsedError;
+
+  @JsonKey(ignore: true)
+  $ProxiesActionsStateCopyWith<ProxiesActionsState> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $ProxiesActionsStateCopyWith<$Res> {
+  factory $ProxiesActionsStateCopyWith(
+          ProxiesActionsState value, $Res Function(ProxiesActionsState) then) =
+      _$ProxiesActionsStateCopyWithImpl<$Res, ProxiesActionsState>;
+  @useResult
+  $Res call({bool isCurrent, bool hasProvider});
+}
+
+/// @nodoc
+class _$ProxiesActionsStateCopyWithImpl<$Res, $Val extends ProxiesActionsState>
+    implements $ProxiesActionsStateCopyWith<$Res> {
+  _$ProxiesActionsStateCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? isCurrent = null,
+    Object? hasProvider = null,
+  }) {
+    return _then(_value.copyWith(
+      isCurrent: null == isCurrent
+          ? _value.isCurrent
+          : isCurrent // ignore: cast_nullable_to_non_nullable
+              as bool,
+      hasProvider: null == hasProvider
+          ? _value.hasProvider
+          : hasProvider // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$ProxiesActionsStateImplCopyWith<$Res>
+    implements $ProxiesActionsStateCopyWith<$Res> {
+  factory _$$ProxiesActionsStateImplCopyWith(_$ProxiesActionsStateImpl value,
+          $Res Function(_$ProxiesActionsStateImpl) then) =
+      __$$ProxiesActionsStateImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({bool isCurrent, bool hasProvider});
+}
+
+/// @nodoc
+class __$$ProxiesActionsStateImplCopyWithImpl<$Res>
+    extends _$ProxiesActionsStateCopyWithImpl<$Res, _$ProxiesActionsStateImpl>
+    implements _$$ProxiesActionsStateImplCopyWith<$Res> {
+  __$$ProxiesActionsStateImplCopyWithImpl(_$ProxiesActionsStateImpl _value,
+      $Res Function(_$ProxiesActionsStateImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? isCurrent = null,
+    Object? hasProvider = null,
+  }) {
+    return _then(_$ProxiesActionsStateImpl(
+      isCurrent: null == isCurrent
+          ? _value.isCurrent
+          : isCurrent // ignore: cast_nullable_to_non_nullable
+              as bool,
+      hasProvider: null == hasProvider
+          ? _value.hasProvider
+          : hasProvider // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
+}
+
+/// @nodoc
+
+class _$ProxiesActionsStateImpl implements _ProxiesActionsState {
+  const _$ProxiesActionsStateImpl(
+      {required this.isCurrent, required this.hasProvider});
+
+  @override
+  final bool isCurrent;
+  @override
+  final bool hasProvider;
+
+  @override
+  String toString() {
+    return 'ProxiesActionsState(isCurrent: $isCurrent, hasProvider: $hasProvider)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$ProxiesActionsStateImpl &&
+            (identical(other.isCurrent, isCurrent) ||
+                other.isCurrent == isCurrent) &&
+            (identical(other.hasProvider, hasProvider) ||
+                other.hasProvider == hasProvider));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, isCurrent, hasProvider);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$ProxiesActionsStateImplCopyWith<_$ProxiesActionsStateImpl> get copyWith =>
+      __$$ProxiesActionsStateImplCopyWithImpl<_$ProxiesActionsStateImpl>(
+          this, _$identity);
+}
+
+abstract class _ProxiesActionsState implements ProxiesActionsState {
+  const factory _ProxiesActionsState(
+      {required final bool isCurrent,
+      required final bool hasProvider}) = _$ProxiesActionsStateImpl;
+
+  @override
+  bool get isCurrent;
+  @override
+  bool get hasProvider;
+  @override
+  @JsonKey(ignore: true)
+  _$$ProxiesActionsStateImplCopyWith<_$ProxiesActionsStateImpl> get copyWith =>
+      throw _privateConstructorUsedError;
 }

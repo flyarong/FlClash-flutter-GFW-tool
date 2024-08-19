@@ -1,4 +1,3 @@
-import 'package:country_flags/country_flags.dart';
 import 'package:dio/dio.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/models/models.dart';
@@ -18,48 +17,44 @@ class _NetworkDetectionState extends State<NetworkDetection> {
   final ipInfoNotifier = ValueNotifier<IpInfo?>(null);
   final timeoutNotifier = ValueNotifier<bool>(false);
   bool? _preIsStart;
-  CancelToken? cancelToken;
   Function? _checkIpDebounce;
+  CancelToken? cancelToken;
 
-  _checkIp(
-    bool isInit,
-    bool isStart,
-  ) async {
+  _checkIp() async {
+    final appState = globalState.appController.appState;
+    final isInit = appState.isInit;
+    final isStart = appState.isStart;
     if (!isInit) return;
     timeoutNotifier.value = false;
     if (_preIsStart == false && _preIsStart == isStart) return;
+    _preIsStart = isStart;
+    ipInfoNotifier.value = null;
     if (cancelToken != null) {
       cancelToken!.cancel();
+      _preIsStart = null;
+      timeoutNotifier.value == false;
       cancelToken = null;
     }
-    ipInfoNotifier.value = null;
-    final ipInfo = await request.checkIp(cancelToken);
+    cancelToken = CancelToken();
+    final ipInfo = await request.checkIp(cancelToken: cancelToken);
     if (ipInfo == null) {
       timeoutNotifier.value = true;
       return;
-    } else {
-      timeoutNotifier.value = false;
     }
-    _preIsStart = isStart;
+    timeoutNotifier.value = false;
     ipInfoNotifier.value = ipInfo;
   }
 
   _checkIpContainer(Widget child) {
-    _checkIpDebounce = debounce(_checkIp);
-    return Selector2<AppState, Config, CheckIpSelectorState>(
-      selector: (_, appState, config) {
-        return CheckIpSelectorState(
-          isInit: appState.isInit,
-          selectedMap: appState.selectedMap,
-          isStart: appState.isStart,
-          checkIpNum: appState.checkIpNum,
-        );
+    return Selector<AppState, num>(
+      selector: (_, appState) {
+        return appState.checkIpNum;
       },
-      builder: (_, state, __) {
+      builder: (_, checkIpNum, child) {
         if (_checkIpDebounce != null) {
-          _checkIpDebounce!([state.isInit, state.isStart]);
+          _checkIpDebounce!();
         }
-        return child;
+        return child!;
       },
       child: child,
     );
@@ -72,8 +67,19 @@ class _NetworkDetectionState extends State<NetworkDetection> {
     timeoutNotifier.dispose();
   }
 
+  String countryCodeToEmoji(String countryCode) {
+    final String code = countryCode.toUpperCase();
+    if (code.length != 2) {
+      return countryCode;
+    }
+    final int firstLetter = code.codeUnitAt(0) - 0x41 + 0x1F1E6;
+    final int secondLetter = code.codeUnitAt(1) - 0x41 + 0x1F1E6;
+    return String.fromCharCode(firstLetter) + String.fromCharCode(secondLetter);
+  }
+
   @override
   Widget build(BuildContext context) {
+    _checkIpDebounce ??= debounce(_checkIp);
     return _checkIpContainer(
       ValueListenableBuilder<IpInfo?>(
         valueListenable: ipInfoNotifier,
@@ -99,10 +105,19 @@ class _NetworkDetectionState extends State<NetworkDetection> {
                           flex: 1,
                           child: FadeBox(
                             child: ipInfo != null
-                                ? CountryFlag.fromCountryCode(
-                                    ipInfo.countryCode,
-                                    width: 24,
-                                    height: 24,
+                                ? Container(
+                                    alignment: Alignment.centerLeft,
+                                    height: globalState.appController.measure
+                                        .titleMediumHeight,
+                                    child: Text(
+                                      countryCodeToEmoji(ipInfo.countryCode),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleLarge
+                                          ?.copyWith(
+                                            fontFamily: "Twemoji",
+                                          ),
+                                    ),
                                   )
                                 : ValueListenableBuilder(
                                     valueListenable: timeoutNotifier,

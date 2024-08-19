@@ -45,11 +45,10 @@ class GlobalState {
     required Config config,
     bool isPatch = true,
   }) async {
-    final profilePath = await appPath.getProfilePath(config.currentProfileId);
     await config.currentProfile?.checkAndUpdate();
     final res = await clashCore.updateConfig(
       UpdateConfigParams(
-        profilePath: profilePath,
+        profileId: config.currentProfileId ?? "",
         config: clashConfig,
         params: ConfigExtendedParams(
           isPatch: isPatch,
@@ -72,13 +71,6 @@ class GlobalState {
     required ClashConfig clashConfig,
   }) async {
     if (!globalState.isVpnService && Platform.isAndroid) {
-      clashCore.setProps(
-        Props(
-          accessControl: config.isAccessControl ? config.accessControl : null,
-          allowBypass: config.allowBypass,
-          systemProxy: config.systemProxy,
-        ),
-      );
       await proxy?.initService();
     } else {
       await proxyManager.startProxy(
@@ -86,16 +78,6 @@ class GlobalState {
       );
     }
     startListenUpdate();
-    if (Platform.isAndroid) {
-      return;
-    }
-    applyProfile(
-      appState: appState,
-      config: config,
-      clashConfig: clashConfig,
-    ).then((_) {
-      globalState.appController.addCheckIpNumDebounce();
-    });
   }
 
   Future<void> stopSystemProxy() async {
@@ -113,8 +95,12 @@ class GlobalState {
       config: config,
       isPatch: false,
     );
-    clashCore.setProfileName(config.currentProfile?.label ?? '');
     await updateGroups(appState);
+    await updateProviders(appState);
+  }
+
+  updateProviders(AppState appState) async {
+    appState.providers = await clashCore.getExternalProviders();
   }
 
   init({
@@ -124,18 +110,19 @@ class GlobalState {
   }) async {
     appState.isInit = clashCore.isInit;
     if (!appState.isInit) {
-      if (Platform.isAndroid) {
-        clashCore.setProps(
-          Props(
-            accessControl: config.isAccessControl ? config.accessControl : null,
-            allowBypass: config.allowBypass,
-            systemProxy: config.systemProxy,
-          ),
-        );
-      }
       appState.isInit = await clashService.init(
         config: config,
         clashConfig: clashConfig,
+      );
+      clashCore.setState(
+        CoreState(
+          accessControl: config.isAccessControl ? config.accessControl : null,
+          allowBypass: config.allowBypass,
+          systemProxy: config.systemProxy,
+          mixedPort: clashConfig.mixedPort,
+          onlyProxy: config.onlyProxy,
+          currentProfileName: config.currentProfile?.label ?? config.currentProfileId ?? "",
+        ),
       );
     }
     updateCoreVersionInfo(appState);
@@ -160,11 +147,13 @@ class GlobalState {
               width: 300,
               constraints: const BoxConstraints(maxHeight: 200),
               child: SingleChildScrollView(
-                child: RichText(
-                  overflow: TextOverflow.visible,
-                  text: TextSpan(
+                child: SelectableText.rich(
+                  TextSpan(
                     style: Theme.of(context).textTheme.labelLarge,
                     children: [message],
+                  ),
+                  style: const TextStyle(
+                    overflow: TextOverflow.visible,
                   ),
                 ),
               ),
@@ -195,7 +184,7 @@ class GlobalState {
         proxyName: proxyName,
       ),
     );
-    if(config.isCloseConnections){
+    if (config.isCloseConnections) {
       clashCore.closeConnections();
     }
   }
@@ -219,7 +208,7 @@ class GlobalState {
     final traffic = clashCore.getTraffic();
     if (Platform.isAndroid && isVpnService == true) {
       proxy?.startForeground(
-        title: clashCore.getProfileName(),
+        title: clashCore.getState().currentProfileName,
         content: "$traffic",
       );
     } else {

@@ -88,7 +88,6 @@ class ApplicationState extends State<Application> {
       }
       await globalState.appController.init();
       globalState.appController.initLink();
-      _updateGroups();
     });
   }
 
@@ -120,35 +119,22 @@ class ApplicationState extends State<Application> {
     });
   }
 
-  _updateGroups() {
-    if (globalState.groupsUpdateTimer != null) {
-      globalState.groupsUpdateTimer?.cancel();
-      globalState.groupsUpdateTimer = null;
-    }
-    globalState.groupsUpdateTimer ??= Timer.periodic(
-      httpTimeoutDuration,
-      (timer) async {
-        await globalState.appController.updateGroups();
-      },
-    );
-  }
-
   @override
   Widget build(context) {
     return AppStateContainer(
-      child: ClashMessageContainer(
+      child: ClashContainer(
         child: Selector2<AppState, Config, ApplicationSelectorState>(
           selector: (_, appState, config) => ApplicationSelectorState(
             locale: config.locale,
             themeMode: config.themeMode,
             primaryColor: config.primaryColor,
+            prueBlack: config.prueBlack,
           ),
           builder: (_, state, child) {
             return DynamicColorBuilder(
               builder: (lightDynamic, darkDynamic) {
                 _updateSystemColorSchemes(lightDynamic, darkDynamic);
                 return MaterialApp(
-                  debugShowCheckedModeBanner: false,
                   navigatorKey: globalState.navigatorKey,
                   localizationsDelegates: const [
                     AppLocalizations.delegate,
@@ -180,7 +166,7 @@ class ApplicationState extends State<Application> {
                       brightness: Brightness.dark,
                       systemColorSchemes: systemColorSchemes,
                       primaryColor: state.primaryColor,
-                    ),
+                    ).toPrueBlack(state.prueBlack),
                   ),
                   home: child,
                 );

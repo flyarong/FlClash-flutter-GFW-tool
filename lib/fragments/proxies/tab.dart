@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:fl_clash/common/common.dart';
 import 'package:fl_clash/enum/enum.dart';
-import 'package:fl_clash/fragments/proxies/setting.dart';
 import 'package:fl_clash/models/models.dart';
 import 'package:fl_clash/state.dart';
 import 'package:fl_clash/widgets/widgets.dart';
@@ -262,54 +261,10 @@ class ProxyGroupViewState extends State<ProxyGroupView> {
     _controller.dispose();
   }
 
-  Widget _buildTabGroupView({
-    required List<Proxy> proxies,
-    required int columns,
-    required ProxyCardType proxyCardType,
-  }) {
-    final sortedProxies = globalState.appController.getSortProxies(
-      proxies,
-    );
-    _lastProxies = sortedProxies;
-    return DelayTestButtonContainer(
-      onClick: () async {
-        await _delayTest(
-          proxies,
-        );
-      },
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: GridView.builder(
-          controller: _controller,
-          padding: const EdgeInsets.all(16),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: columns,
-            mainAxisSpacing: 8,
-            crossAxisSpacing: 8,
-            mainAxisExtent: getItemHeight(proxyCardType),
-          ),
-          itemCount: sortedProxies.length,
-          itemBuilder: (_, index) {
-            final proxy = sortedProxies[index];
-            return currentProxyNameBuilder(
-              builder: (value) {
-                return ProxyCard(
-                  type: proxyCardType,
-                  key: ValueKey('$groupName.${proxy.name}'),
-                  isSelected: value == proxy.name,
-                  proxy: proxy,
-                  groupName: groupName,
-                );
-              },
-              groupName: groupName,
-            );
-          },
-        ),
-      ),
-    );
-  }
-
   scrollToSelected() {
+    if (_controller.position.maxScrollExtent == 0) {
+      return;
+    }
     _controller.animateTo(
       16 +
           getScrollToSelectedOffset(
@@ -329,19 +284,53 @@ class ProxyGroupViewState extends State<ProxyGroupView> {
         return ProxyGroupSelectorState(
           proxyCardType: config.proxyCardType,
           proxiesSortType: config.proxiesSortType,
-          columns: globalState.appController.columns,
+          columns: other.getProxiesColumns(
+            appState.viewWidth,
+            config.proxiesLayout,
+          ),
           sortNum: appState.sortNum,
           proxies: group.all,
+          groupType: group.type,
         );
       },
       builder: (_, state, __) {
         final proxies = state.proxies;
         final columns = state.columns;
         final proxyCardType = state.proxyCardType;
-        return _buildTabGroupView(
-          proxies: proxies,
-          columns: columns,
-          proxyCardType: proxyCardType,
+        final sortedProxies = globalState.appController.getSortProxies(
+          proxies,
+        );
+        _lastProxies = sortedProxies;
+        return DelayTestButtonContainer(
+          onClick: () async {
+            await _delayTest(
+              proxies,
+            );
+          },
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: GridView.builder(
+              controller: _controller,
+              padding: const EdgeInsets.all(16),
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: columns,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
+                mainAxisExtent: getItemHeight(proxyCardType),
+              ),
+              itemCount: sortedProxies.length,
+              itemBuilder: (_, index) {
+                final proxy = sortedProxies[index];
+                return ProxyCard(
+                  groupType: state.groupType,
+                  type: proxyCardType,
+                  key: ValueKey('$groupName.${proxy.name}'),
+                  proxy: proxy,
+                  groupName: groupName,
+                );
+              },
+            ),
+          ),
         );
       },
     );

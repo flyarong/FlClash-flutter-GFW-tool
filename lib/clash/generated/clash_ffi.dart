@@ -5190,30 +5190,6 @@ class ClashFFI {
       _lookup<ffi.NativeFunction<ffi.Void Function()>>('forceGc');
   late final _forceGc = _forceGcPtr.asFunction<void Function()>();
 
-  void setCurrentProfileName(
-    ffi.Pointer<ffi.Char> s,
-  ) {
-    return _setCurrentProfileName(
-      s,
-    );
-  }
-
-  late final _setCurrentProfileNamePtr =
-      _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Char>)>>(
-          'setCurrentProfileName');
-  late final _setCurrentProfileName = _setCurrentProfileNamePtr
-      .asFunction<void Function(ffi.Pointer<ffi.Char>)>();
-
-  ffi.Pointer<ffi.Char> getCurrentProfileName() {
-    return _getCurrentProfileName();
-  }
-
-  late final _getCurrentProfileNamePtr =
-      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
-          'getCurrentProfileName');
-  late final _getCurrentProfileName =
-      _getCurrentProfileNamePtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
-
   void validateConfig(
     ffi.Pointer<ffi.Char> s,
     int port,
@@ -5409,24 +5385,76 @@ class ClashFFI {
   late final _getExternalProviders =
       _getExternalProvidersPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
 
+  ffi.Pointer<ffi.Char> getExternalProvider(
+    ffi.Pointer<ffi.Char> name,
+  ) {
+    return _getExternalProvider(
+      name,
+    );
+  }
+
+  late final _getExternalProviderPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Pointer<ffi.Char> Function(
+              ffi.Pointer<ffi.Char>)>>('getExternalProvider');
+  late final _getExternalProvider = _getExternalProviderPtr
+      .asFunction<ffi.Pointer<ffi.Char> Function(ffi.Pointer<ffi.Char>)>();
+
+  void updateGeoData(
+    ffi.Pointer<ffi.Char> geoType,
+    ffi.Pointer<ffi.Char> geoName,
+    int port,
+  ) {
+    return _updateGeoData(
+      geoType,
+      geoName,
+      port,
+    );
+  }
+
+  late final _updateGeoDataPtr = _lookup<
+      ffi.NativeFunction<
+          ffi.Void Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
+              ffi.LongLong)>>('updateGeoData');
+  late final _updateGeoData = _updateGeoDataPtr.asFunction<
+      void Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, int)>();
+
   void updateExternalProvider(
     ffi.Pointer<ffi.Char> providerName,
-    ffi.Pointer<ffi.Char> providerType,
     int port,
   ) {
     return _updateExternalProvider(
       providerName,
-      providerType,
       port,
     );
   }
 
   late final _updateExternalProviderPtr = _lookup<
       ffi.NativeFunction<
+          ffi.Void Function(
+              ffi.Pointer<ffi.Char>, ffi.LongLong)>>('updateExternalProvider');
+  late final _updateExternalProvider = _updateExternalProviderPtr
+      .asFunction<void Function(ffi.Pointer<ffi.Char>, int)>();
+
+  void sideLoadExternalProvider(
+    ffi.Pointer<ffi.Char> providerName,
+    ffi.Pointer<ffi.Char> data,
+    int port,
+  ) {
+    return _sideLoadExternalProvider(
+      providerName,
+      data,
+      port,
+    );
+  }
+
+  late final _sideLoadExternalProviderPtr = _lookup<
+      ffi.NativeFunction<
           ffi.Void Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>,
-              ffi.LongLong)>>('updateExternalProvider');
-  late final _updateExternalProvider = _updateExternalProviderPtr.asFunction<
-      void Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, int)>();
+              ffi.LongLong)>>('sideLoadExternalProvider');
+  late final _sideLoadExternalProvider =
+      _sideLoadExternalProviderPtr.asFunction<
+          void Function(ffi.Pointer<ffi.Char>, ffi.Pointer<ffi.Char>, int)>();
 
   void initNativeApiBridge(
     ffi.Pointer<ffi.Void> api,
@@ -5499,29 +5527,28 @@ class ClashFFI {
   late final _setProcessMap =
       _setProcessMapPtr.asFunction<void Function(ffi.Pointer<ffi.Char>)>();
 
-  ffi.Pointer<ffi.Char> getAndroidProps() {
-    return _getAndroidProps();
+  ffi.Pointer<ffi.Char> getState() {
+    return _getState();
   }
 
-  late final _getAndroidPropsPtr =
-      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>(
-          'getAndroidProps');
-  late final _getAndroidProps =
-      _getAndroidPropsPtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
+  late final _getStatePtr =
+      _lookup<ffi.NativeFunction<ffi.Pointer<ffi.Char> Function()>>('getState');
+  late final _getState =
+      _getStatePtr.asFunction<ffi.Pointer<ffi.Char> Function()>();
 
-  void setAndroidProps(
+  void setState(
     ffi.Pointer<ffi.Char> s,
   ) {
-    return _setAndroidProps(
+    return _setState(
       s,
     );
   }
 
-  late final _setAndroidPropsPtr =
+  late final _setStatePtr =
       _lookup<ffi.NativeFunction<ffi.Void Function(ffi.Pointer<ffi.Char>)>>(
-          'setAndroidProps');
-  late final _setAndroidProps =
-      _setAndroidPropsPtr.asFunction<void Function(ffi.Pointer<ffi.Char>)>();
+          'setState');
+  late final _setState =
+      _setStatePtr.asFunction<void Function(ffi.Pointer<ffi.Char>)>();
 
   void startTUN(
     int fd,

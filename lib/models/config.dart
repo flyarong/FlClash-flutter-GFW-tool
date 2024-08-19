@@ -18,6 +18,7 @@ class AccessControl with _$AccessControl {
     @Default(AccessControlMode.rejectSelected) AccessControlMode mode,
     @Default([]) List<String> acceptList,
     @Default([]) List<String> rejectList,
+    @Default(AccessSortType.none) AccessSortType sort,
     @Default(true) bool isFilterSystemApp,
   }) = _AccessControl;
 
@@ -25,15 +26,26 @@ class AccessControl with _$AccessControl {
       _$AccessControlFromJson(json);
 }
 
+extension AccessControlExt on AccessControl {
+  List<String> get currentList => switch (mode) {
+        AccessControlMode.acceptSelected => acceptList,
+        AccessControlMode.rejectSelected => rejectList,
+      };
+}
+
 @freezed
-class Props with _$Props {
-  const factory Props({
+class CoreState with _$CoreState {
+  const factory CoreState({
     AccessControl? accessControl,
+    required String currentProfileName,
     required bool allowBypass,
     required bool systemProxy,
-  }) = _Props;
+    required int mixedPort,
+    required bool onlyProxy,
+  }) = _CoreState;
 
-  factory Props.fromJson(Map<String, Object?> json) => _$PropsFromJson(json);
+  factory CoreState.fromJson(Map<String, Object?> json) =>
+      _$CoreStateFromJson(json);
 }
 
 @freezed
@@ -76,9 +88,11 @@ class Config extends ChangeNotifier {
   bool _isCloseConnections;
   ProxiesType _proxiesType;
   ProxyCardType _proxyCardType;
-  int _proxiesColumns;
+  ProxiesLayout _proxiesLayout;
   String _testUrl;
   WindowProps _windowProps;
+  bool _onlyProxy;
+  bool _prueBlack;
 
   Config()
       : _profiles = [],
@@ -103,7 +117,9 @@ class Config extends ChangeNotifier {
         _proxyCardType = ProxyCardType.expand,
         _windowProps = defaultWindowProps,
         _proxiesType = ProxiesType.tab,
-        _proxiesColumns = 2;
+        _prueBlack = false,
+        _onlyProxy = false,
+        _proxiesLayout = ProxiesLayout.standard;
 
   deleteProfileById(String id) {
     _profiles = profiles.where((element) => element.id != id).toList();
@@ -305,6 +321,16 @@ class Config extends ChangeNotifier {
     }
   }
 
+  @JsonKey(defaultValue: ProxiesLayout.standard)
+  ProxiesLayout get proxiesLayout => _proxiesLayout;
+
+  set proxiesLayout(ProxiesLayout value) {
+    if (_proxiesLayout != value) {
+      _proxiesLayout = value;
+      notifyListeners();
+    }
+  }
+
   @JsonKey(defaultValue: true)
   bool get isMinimizeOnExit => _isMinimizeOnExit;
 
@@ -408,6 +434,30 @@ class Config extends ChangeNotifier {
   }
 
   @JsonKey(defaultValue: false)
+  bool get onlyProxy {
+    return _onlyProxy;
+  }
+
+  set onlyProxy(bool value) {
+    if (_onlyProxy != value) {
+      _onlyProxy = value;
+      notifyListeners();
+    }
+  }
+
+  @JsonKey(defaultValue: false)
+  bool get prueBlack {
+    return _prueBlack;
+  }
+
+  set prueBlack(bool value) {
+    if (_prueBlack != value) {
+      _prueBlack = value;
+      notifyListeners();
+    }
+  }
+
+  @JsonKey(defaultValue: false)
   bool get isCloseConnections {
     return _isCloseConnections;
   }
@@ -438,16 +488,6 @@ class Config extends ChangeNotifier {
   set proxyCardType(ProxyCardType value) {
     if (_proxyCardType != value) {
       _proxyCardType = value;
-      notifyListeners();
-    }
-  }
-
-  @JsonKey(defaultValue: 2)
-  int get proxiesColumns => _proxiesColumns;
-
-  set proxiesColumns(int value) {
-    if (_proxiesColumns != value) {
-      _proxiesColumns = value;
       notifyListeners();
     }
   }
@@ -513,6 +553,7 @@ class Config extends ChangeNotifier {
       _accessControl = config._accessControl;
       _isAnimateToPage = config._isAnimateToPage;
       _autoCheckUpdate = config._autoCheckUpdate;
+      _prueBlack = config._prueBlack;
       _testUrl = config._testUrl;
       _isExclude = config._isExclude;
       _windowProps = config._windowProps;
