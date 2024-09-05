@@ -4,6 +4,16 @@ import "C"
 import (
 	"context"
 	"errors"
+	"math"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"strings"
+	"sync"
+	"syscall"
+	"time"
+
 	"github.com/metacubex/mihomo/adapter"
 	"github.com/metacubex/mihomo/adapter/inbound"
 	"github.com/metacubex/mihomo/adapter/outboundgroup"
@@ -11,6 +21,7 @@ import (
 	"github.com/metacubex/mihomo/common/batch"
 	"github.com/metacubex/mihomo/component/dialer"
 	"github.com/metacubex/mihomo/component/resolver"
+	"github.com/metacubex/mihomo/component/sniffer"
 	"github.com/metacubex/mihomo/config"
 	"github.com/metacubex/mihomo/constant"
 	cp "github.com/metacubex/mihomo/constant/provider"
@@ -21,56 +32,14 @@ import (
 	"github.com/metacubex/mihomo/log"
 	rp "github.com/metacubex/mihomo/rules/provider"
 	"github.com/metacubex/mihomo/tunnel"
-	"os"
-	"os/exec"
-	"path/filepath"
-	"runtime"
-	"strings"
-	"sync"
-	"syscall"
-	"time"
 )
-
-//type healthCheckSchema struct {
-//	Enable         bool   `provider:"enable"`
-//	URL            string `provider:"url"`
-//	Interval       int    `provider:"interval"`
-//	TestTimeout    int    `provider:"timeout,omitempty"`
-//	Lazy           bool   `provider:"lazy,omitempty"`
-//	ExpectedStatus string `provider:"expected-status,omitempty"`
-//}
-
-//type proxyProviderSchema struct {
-//	Type          string `provider:"type"`
-//	Path          string `provider:"path,omitempty"`
-//	URL           string `provider:"url,omitempty"`
-//	Proxy         string `provider:"proxy,omitempty"`
-//	Interval      int    `provider:"interval,omitempty"`
-//	Filter        string `provider:"filter,omitempty"`
-//	ExcludeFilter string `provider:"exclude-filter,omitempty"`
-//	ExcludeType   string `provider:"exclude-type,omitempty"`
-//	DialerProxy   string `provider:"dialer-proxy,omitempty"`
-//
-//	HealthCheck healthCheckSchema   `provider:"health-check,omitempty"`
-//	Override    ap.OverrideSchema   `provider:"override,omitempty"`
-//	Header      map[string][]string `provider:"header,omitempty"`
-//}
-//
-//type ruleProviderSchema struct {
-//	Type     string `provider:"type"`
-//	Behavior string `provider:"behavior"`
-//	Path     string `provider:"path,omitempty"`
-//	URL      string `provider:"url,omitempty"`
-//	Proxy    string `provider:"proxy,omitempty"`
-//	Format   string `provider:"format,omitempty"`
-//	Interval int    `provider:"interval,omitempty"`
-//}
 
 type ConfigExtendedParams struct {
 	IsPatch      bool              `json:"is-patch"`
 	IsCompatible bool              `json:"is-compatible"`
 	SelectedMap  map[string]string `json:"selected-map"`
 	TestURL      *string           `json:"test-url"`
+	OverrideDns  bool              `json:"override-dns"`
 }
 
 type GenerateConfigParams struct {
@@ -412,6 +381,12 @@ func generateProxyGroupAndRule(proxyGroup *[]map[string]any, rule *[]string) {
 	*rule = computedRule
 }
 
+func genHosts(hosts, patchHosts map[string]any) {
+	for k, v := range patchHosts {
+		hosts[k] = v
+	}
+}
+
 func overwriteConfig(targetConfig *config.RawConfig, patchConfig config.RawConfig) {
 	targetConfig.ExternalController = patchConfig.ExternalController
 	targetConfig.ExternalUI = ""
@@ -419,7 +394,6 @@ func overwriteConfig(targetConfig *config.RawConfig, patchConfig config.RawConfi
 	targetConfig.ExternalUIURL = ""
 	targetConfig.TCPConcurrent = patchConfig.TCPConcurrent
 	targetConfig.UnifiedDelay = patchConfig.UnifiedDelay
-	//targetConfig.GeodataMode = false
 	targetConfig.IPv6 = patchConfig.IPv6
 	targetConfig.LogLevel = patchConfig.LogLevel
 	targetConfig.Port = 0
@@ -437,7 +411,11 @@ func overwriteConfig(targetConfig *config.RawConfig, patchConfig config.RawConfi
 	targetConfig.Profile.StoreSelected = false
 	targetConfig.GeoXUrl = patchConfig.GeoXUrl
 	targetConfig.GlobalUA = patchConfig.GlobalUA
-	if targetConfig.DNS.Enable == false {
+	//if targetConfig.DNS.Enable == false {
+	//	targetConfig.DNS = patchConfig.DNS
+	//}
+	genHosts(targetConfig.Hosts, patchConfig.Hosts)
+	if configParams.OverrideDns {
 		targetConfig.DNS = patchConfig.DNS
 	}
 	//if runtime.GOOS == "android" {
@@ -445,40 +423,80 @@ func overwriteConfig(targetConfig *config.RawConfig, patchConfig config.RawConfi
 	//} else if runtime.GOOS == "windows" {
 	//	targetConfig.DNS.NameServer = append(targetConfig.DNS.NameServer, dns.SystemDNSPlaceholder)
 	//}
-	if configParams.IsCompatible == false {
-		targetConfig.ProxyProvider = make(map[string]map[string]any)
-		targetConfig.RuleProvider = make(map[string]map[string]any)
-		generateProxyGroupAndRule(&targetConfig.ProxyGroup, &targetConfig.Rule)
-	}
+	//if configParams.IsCompatible == false {
+	//	targetConfig.ProxyProvider = make(map[string]map[string]any)
+	//	targetConfig.RuleProvider = make(map[string]map[string]any)
+	//	generateProxyGroupAndRule(&targetConfig.ProxyGroup, &targetConfig.Rule)
+	//}
 }
 
 func patchConfig(general *config.General) {
 	log.Infoln("[Apply] patch")
 	route.ReStartServer(general.ExternalController)
+	if sniffer.Dispatcher != nil {
+		tunnel.SetSniffing(general.Sniffing)
+	}
+	tunnel.SetFindProcessMode(general.FindProcessMode)
+	dialer.SetTcpConcurrent(general.TCPConcurrent)
+	dialer.DefaultInterface.Store(general.Interface)
+	adapter.UnifiedDelay.Store(general.UnifiedDelay)
+	tunnel.SetMode(general.Mode)
+	log.SetLevel(general.LogLevel)
+	resolver.DisableIPv6 = !general.IPv6
+}
+
+var isRunning = false
+
+var runLock sync.Mutex
+
+func updateListeners(general *config.General, listeners map[string]constant.InboundListener) {
+	if !isRunning {
+		return
+	}
+	runLock.Lock()
+	defer runLock.Unlock()
+	listener.PatchInboundListeners(listeners, tunnel.Tunnel, true)
 	listener.SetAllowLan(general.AllowLan)
 	inbound.SetSkipAuthPrefixes(general.SkipAuthPrefixes)
 	inbound.SetAllowedIPs(general.LanAllowedIPs)
 	inbound.SetDisAllowedIPs(general.LanDisAllowedIPs)
 	listener.SetBindAddress(general.BindAddress)
-	tunnel.SetSniffing(general.Sniffing)
-	tunnel.SetFindProcessMode(general.FindProcessMode)
-	dialer.SetTcpConcurrent(general.TCPConcurrent)
-	dialer.DefaultInterface.Store(general.Interface)
-	adapter.UnifiedDelay.Store(general.UnifiedDelay)
 	listener.ReCreateHTTP(general.Port, tunnel.Tunnel)
 	listener.ReCreateSocks(general.SocksPort, tunnel.Tunnel)
 	listener.ReCreateRedir(general.RedirPort, tunnel.Tunnel)
 	listener.ReCreateAutoRedir(general.EBpf.AutoRedir, tunnel.Tunnel)
 	listener.ReCreateTProxy(general.TProxyPort, tunnel.Tunnel)
-	listener.ReCreateTun(general.Tun, tunnel.Tunnel)
 	listener.ReCreateMixed(general.MixedPort, tunnel.Tunnel)
 	listener.ReCreateShadowSocks(general.ShadowSocksConfig, tunnel.Tunnel)
 	listener.ReCreateVmess(general.VmessConfig, tunnel.Tunnel)
 	listener.ReCreateTuic(general.TuicServer, tunnel.Tunnel)
-	tunnel.SetMode(general.Mode)
-	log.SetLevel(general.LogLevel)
+	listener.ReCreateTun(general.Tun, tunnel.Tunnel)
+	listener.ReCreateRedirToTun(general.EBpf.RedirectToTun)
+}
 
-	resolver.DisableIPv6 = !general.IPv6
+func stopListeners() {
+	listener.StopListener()
+}
+
+func hcCompatibleProvider(proxyProviders map[string]cp.ProxyProvider) {
+	wg := sync.WaitGroup{}
+	ch := make(chan struct{}, math.MaxInt)
+	for _, proxyProvider := range proxyProviders {
+		proxyProvider := proxyProvider
+		if proxyProvider.VehicleType() == cp.Compatible {
+			log.Infoln("Start initial Compatible provider %s", proxyProvider.Name())
+			wg.Add(1)
+			ch <- struct{}{}
+			go func() {
+				defer func() { <-ch; wg.Done() }()
+				if err := proxyProvider.Initial(); err != nil {
+					log.Errorln("initial Compatible provider %s error: %v", proxyProvider.Name(), err)
+				}
+			}()
+		}
+
+	}
+
 }
 
 func patchSelectGroup() {
@@ -506,12 +524,8 @@ func patchSelectGroup() {
 	}
 }
 
-var applyLock sync.Mutex
-
 func applyConfig() error {
-	applyLock.Lock()
-	defer applyLock.Unlock()
-	cfg, err := config.ParseRawConfig(currentConfig)
+	cfg, err := config.ParseRawConfig(currentRawConfig)
 	if err != nil {
 		cfg, _ = config.ParseRawConfig(config.DefaultRawConfig())
 	}
@@ -523,9 +537,11 @@ func applyConfig() error {
 	} else {
 		closeConnections()
 		runtime.GC()
-		hub.UltraApplyConfig(cfg, true)
+		hub.UltraApplyConfig(cfg)
 		patchSelectGroup()
 	}
+	updateListeners(cfg.General, cfg.Listeners)
+	hcCompatibleProvider(cfg.Providers)
 	externalProviders = getExternalProvidersRaw()
 	return err
 }

@@ -131,6 +131,12 @@ class Other {
     return build1.compareTo(build2);
   }
 
+  String getPinyin(String value) {
+    return value.isNotEmpty
+        ? PinyinHelper.getFirstWordPinyin(value.substring(0, 1))
+        : "";
+  }
+
   Future<String?> parseQRCode(Uint8List? bytes) {
     return Isolate.run<String?>(() {
       if (bytes == null) return null;
@@ -191,7 +197,6 @@ class Other {
     if (viewWidth <= maxLaptopWidth) return ViewMode.laptop;
     return ViewMode.desktop;
   }
-
 
   int getProxiesColumns(double viewWidth, ProxiesLayout proxiesLayout) {
     final columns = max((viewWidth / 300).ceil(), 2);
